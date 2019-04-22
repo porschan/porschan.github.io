@@ -1,40 +1,64 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="porschan,710437653@qq.com"><title>chanchifeng</title><meta name="description" content="A Blog Powered By Hexo"><meta name="keywords" content="Hexo,HTML,CSS,android,Linux"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title=""><a href="/">chanchifeng</a></h3><div class="description"><p>Carpet Diem</p></div></div></div><ul class="social-links"><li><a href="http://github.com/porschan"><i class="fa fa-github"></i></a></li></ul><div class="footer"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a class="current" href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li><li><a href="/readme">引导</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)" style="display:none;"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/12/08/springboot-devtools/">SpringBoot开发中的热部署</a></h3></div><div class="post-content"><p>    来历：    自身的特点：    适合解决的问题：    实际的应用场景：
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="porschan,710437653@qq.com"><title>chanchifeng</title><meta name="description" content="A Blog Powered By Hexo"><meta name="keywords" content="Hexo,HTML,CSS,android,Linux"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title><a href="/">chanchifeng</a></h3><div class="description"><p>Carpet Diem</p></div></div></div><ul class="social-links"><li><a href="http://github.com/porschan"><i class="fa fa-github"></i></a></li></ul><div class="footer"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a class="current" href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li><li><a href="/readme">引导</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)" style="display:none;"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/18/springboot-mybatis/">springboot - 集成 mybatis</a></h3></div><div class="post-content"><p>1.在springBootStudio项目中添加Module。
+2.选择Spring Initializr，点击next。
 
-引入依赖1234&lt;dependency&gt;  	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;  	&lt;artifactId&gt;spring-bo...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-12-08</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/12/06/algorithm-dataStructure/">数据结构</a></h3></div><div class="post-content"><p>    来历：    自身的特点：    适合解决的问题：    实际的应用场景：
+3.Group填写com.chanchifeng，Artifact填写mybatis。
 
-数据结构
-    简单的讲就是数据在计算机中的存储方式。    常用的数据存储方式有两种：顺序存储，非顺序存储。顺序存储就是把数据存储在一块联系的存储介质（硬盘或内存等）中。反之就是非顺序存储咯。Java中的数组就是典型的顺序存...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-12-06</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/12/02/tomcat-server-install/">Tomcat安装服务之指定jdk版本</a></h3></div><div class="post-content"><p>    来历：    自身的特点：    适合解决的问题：    实际的应用场景：
+4.勾选SQL中的MySQL、JDBC和MyBatis，点击next。
 
-操作步骤1.找到Tomcat根目录的/bin/service.bat文件。2.在文件前端添加如下。
-123456789101112131415161718192021222324...rem ------------------...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-12-02</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/12/01/windows-taskkill/">windows中使用命令行关闭进程</a></h3></div><div class="post-content"><p>    来历：    自身的特点：    适合解决的问题：    实际的应用场景：
+5.Content_ro...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-18</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/17/windows-install-ubunt-vm/">windows - 虚拟机安装 ubunt</a></h3></div><div class="post-content"><p>1.这里使用的VMware Workstation软件，打开该软件。
+2.点击创建新的虚拟机，如下图：
 
-12345杀死进程使用以下指令：taskkill /pid 14396  -t  -f-f 用来强制执行
-    参考文章：Windows cmd 下 杀死指定 pid 的进程：https://blog.csdn.net/u01...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-12-01</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/11/30/nginx-https-http/">nginx同时保持http和https</a></h3></div><div class="post-content"><p>    来历：    自身的特点：    适合解决的问题：    实际的应用场景：
+3.选择典型，如下图：
 
-我使用的nginx版本是1.9.7，直接post：
-1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-11-30</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/11/29/nginx-https-ali/">Nginx配置阿里云ssl证书使HTTPS生效</a></h3></div><div class="post-content"><p>从阿里云获取免费的SSL，解压后获取.pem和.key文件，以下直接POST数据（nginx.conf），参考：
-1234567891011121314151617181920212223# HTTPS server#server &#123;    listen       443 ssl;    server...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-11-29</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/11/29/windows-jdks/">windows下面切换jdk版本</a></h3></div><div class="post-content"><p>    来历：    自身的特点：    适合解决的问题：    实际的应用场景：
+4.选择稍后安装操作系统，如下图：
 
-jdk的安装过程非常傻瓜，下一步下一步。
-jdk各个版本的下载：https://www.oracle.com/technetwork/java/javase/archive-139210.html
-很多人都以为windows修改...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-11-29</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/11/29/Tomcat-much/">启动多个Tomcat</a></h3></div><div class="post-content"><p>    来历：    自身的特点：    适合解决的问题：    实际的应用场景：
+5.客户机操作系统选择Linux，版本选择Ubuntu,如下图：
 
-其要点在于如何设置Tomcat的配置文件。
-参考文章：    1.如何在一台机器上启动多个tomcat服务：https://jingyan.baidu.com/article/4f7d5712eb23221a21192757.h...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-11-29</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/11/21/algorithm-BigO/">时间复杂度</a></h3></div><div class="post-content"><p>    来历：    自身的特点：    适合解决的问题：    实际的应用场景：
+6.虚拟机名称和位置可以根据你的具体位置设置，如下图：
 
-时间复杂度
-注意：只看最高复杂度的运算。
+7.使用默认最低配...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-17</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/17/springboot-quartz/">springboot - 使用 quartz 定时器</a></h3></div><div class="post-content"><p>1.在springBootStudio项目中添加Module。
+2.选择Spring Initializr，点击next。
 
-如何计算
+3.Group填写com.chanchifeng，Artifact填写quartz。
+
+4.选择Quartz Scheduler，点击next。
+
+5.Content_root和Modul...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-17</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/17/springboot-log4j/">springboot - 使用 log4j 日志</a></h3></div><div class="post-content"><p>1.在springBootStudio项目中添加Module。
+2.选择Spring Initializr，点击next。
+
+3.Group填写com.chanchifeng，Artifact填写log4j。
+
+4.点击next。
+
+5.Content_root和Module file location选择spr...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-17</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/16/springboot-redis/">springboot - 使用 redis</a></h3></div><div class="post-content"><p>1.关于redis在windows系统如何安装，可以参考过完文章（Redis - windows系统安装）。
+2.在springBootStudio项目中添加Module。
+3.选择Spring Initializr，点击next。
+
+3.Group填写com.chanchifeng，Artifact填写redi...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-16</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/16/redis-install/">Redis - windows系统安装</a></h3></div><div class="post-content"><p>1.在浏览器中输入：https://github.com/MicrosoftArchive/redis/releases
+
+2.我们这里选用最新的redis（3.2.100）的Redis-x64-3.2.100.zip，但是在服务器中，必须选择稳定版本！！！下载完成后，并解压，如下图：
+
+3.打开redis-se...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-16</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/16/java-install/">java - windows安装</a></h3></div><div class="post-content"><p>windows上面的安装包为jdk-8u152-windows-x64.exe1.获取安装包，并安装步骤如下：
 
 
-常数复杂度123int sum = 0,n = 100;//执行一次sum = 1 + n;//执行一次
-上面时间复杂度：O(1)
-对数复杂度12345int numbe...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-11-21</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2018/11/19/hello-algorithm/">您好，数据结构和算法</a></h3></div><div class="post-content"><p>    来历：    自身的特点：    适合解决的问题：    实际的应用场景：
 
-最近在买了一个课题，就是我一直想接触的数据结构和算法。课题是在极客时间中的《算法面试通关40讲》，讲师是覃超。
-对课程做了一下笔记：
-为什么要掌握算法与数据结构
-编程的内功修炼
-去国内一流互联网公司的必要条件
-硅谷互联网公司面试...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-11-19</span><i class="fa fa-tag"></i></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/page/4/">上一页</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/page/6/">下一页</a></li></ul></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
+
+2.查找到默认的安装路径，如下图：
+
+3.右键我的电脑，点击属性，如下图：
+
+4.选择左边导航栏的高级系统设置，如下图：
+
+5.选择底部的环境变量，如下图：
+
+6.在”系统变量”中设置3项属性，...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-16</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/15/git-basic/">Git - 基本配置</a></h3></div><div class="post-content"><p>创建Git仓库12345671.在现有目录中初始化仓库如果你打算使用 Git 来对现有的项目进行管理，你只需要进入该项目目录并输入：$ git init2.新建项目会在当前路径下创建和项目名称同名的文件夹：$ git init your_project
+config的三个作用域1234567891011121.s...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-15</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/14/springboot-listener/">springboot - 使用 listener 监听器</a></h3></div><div class="post-content"><p>在原本的项目中使用listener监听器具体项目搭建参考：springboot - 使用 filter 过滤器(https://chanchifeng.com/2019/01/31/springboot-filter/)
+1.在项目中创建一个listener包，在其下创建UserListener的类，代码如下：
+...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-14</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/14/springboot-filter/">springboot - 使用 filter 过滤器</a></h3></div><div class="post-content"><p>1.在springBootStudio项目中添加Module。
+2.选择Spring Initializr，点击next。
+
+3.Group填写com.chanchifeng，Artifact填写filter。
+
+4.勾选SQL中的Web和Thymeleaf，点击next。
+
+5.Content_root和Mod...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-14</span><i class="fa fa-tag"></i></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/page/4/">上一页</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/page/6/">下一页</a></li></ul></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
