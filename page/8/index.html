@@ -1,4 +1,21 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="porschan,710437653@qq.com"><title>chanchifeng</title><meta name="description" content="A Blog Powered By Hexo"><meta name="keywords" content="Hexo,HTML,CSS,android,Linux"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title><a href="/">chanchifeng</a></h3><div class="description"><p>Carpet Diem</p></div></div></div><ul class="social-links"><li><a href="http://github.com/porschan"><i class="fa fa-github"></i></a></li></ul><div class="footer"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a class="current" href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li><li><a href="/readme">引导</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)" style="display:none;"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/03/04/springboot-activemq/">springboot - 使用 ActiveMQ</a></h3></div><div class="post-content"><p>1.在springBootStudio项目中添加Module。
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="porschan,710437653@qq.com"><title>chanchifeng</title><meta name="description" content="A Blog Powered By Hexo"><meta name="keywords" content="Hexo,HTML,CSS,android,Linux"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title><a href="/">chanchifeng</a></h3><div class="description"><p>Carpet Diem</p></div></div></div><ul class="social-links"><li><a href="http://github.com/porschan"><i class="fa fa-github"></i></a></li></ul><div class="footer"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a class="current" href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li><li><a href="/readme">引导</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)" style="display:none;"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/03/06/designPattern-strategyPattern/">设计模式 - 策略模式</a></h3></div><div class="post-content"><p>感想我们对可变的东西规划为一种接口，实现变化则实现接口，并在抽象对象中，添加可变的接口，以到达继承抽象类的时候，能够灵活的调整而无需进行大规模的调整。
+1.模式结构
+
+2.对可变的规划为接口，代码如下：
+123public interface FlyBehavior &#123;	void fly();&#125...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-06</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/03/06/springboot-async/">springboot - 使用 @Async 异步调用</a></h3></div><div class="post-content"><p>1.在springBootStudio项目中添加Module。
+2.选择Spring Initializr，点击next。
+
+3.Group填写com.chanchifeng，Artifact填写async。
+
+4.勾选SQL中的Web，点击next。
+
+5.Content_root和Module file lo...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-06</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/03/05/maven-down/">maven - 单独下载pom.xml里的jar包</a></h3></div><div class="post-content"><p>1.确认在系统中安装完成maven，如下图：
+
+2.创建一个文件夹夹，在文件夹里创建toJar.bat 和 pom.xml。
+3.toJar.bat的代码如下：
+12call mvn -f pom.xml dependency:copy-dependencies@pause
+4.pom.xml的代码如下：
+123...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-05</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/03/04/springboot-activemq/">springboot - 使用 ActiveMQ</a></h3></div><div class="post-content"><p>1.在springBootStudio项目中添加Module。
 2.选择Spring Initializr，点击next。
 
 3.Group填写com.chanchifeng，Artifact填写activemq。
@@ -19,29 +36,4 @@
 Maven Helper参考：https://plugins.jetbrains.com/pl...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-24</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/22/nginx-basic/">nginx - 基本配置</a></h3></div><div class="post-content"><p>123456789101112131415161718192021222324252627282930313233343536371.下载nginx:porschan@porschan-virtual-machine:~$ wget http://nginx.org/download/nginx-1.14.2.t...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-22</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/18/mongodb-install/">mongodb - windows系统安装</a></h3></div><div class="post-content"><p>1.在浏览器中输入：https://www.mongodb.com/download-center/community
 
 2.如上图所示，Package选择Zip，点击Download按钮，即可下载mongodb-win32-x86_64-2008plus-ssl-4.0.6.zip。
-3.mongodb-win...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-18</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/18/springboot-mybatis/">springboot - 集成 mybatis</a></h3></div><div class="post-content"><p>1.在springBootStudio项目中添加Module。
-2.选择Spring Initializr，点击next。
-
-3.Group填写com.chanchifeng，Artifact填写mybatis。
-
-4.勾选SQL中的MySQL、JDBC和MyBatis，点击next。
-
-5.Content_ro...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-18</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/17/windows-install-ubunt-vm/">windows - 虚拟机安装 ubunt</a></h3></div><div class="post-content"><p>1.这里使用的VMware Workstation软件，打开该软件。
-2.点击创建新的虚拟机，如下图：
-
-3.选择典型，如下图：
-
-4.选择稍后安装操作系统，如下图：
-
-5.客户机操作系统选择Linux，版本选择Ubuntu,如下图：
-
-6.虚拟机名称和位置可以根据你的具体位置设置，如下图：
-
-7.使用默认最低配...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-17</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/02/17/springboot-quartz/">springboot - 使用 quartz 定时器</a></h3></div><div class="post-content"><p>1.在springBootStudio项目中添加Module。
-2.选择Spring Initializr，点击next。
-
-3.Group填写com.chanchifeng，Artifact填写quartz。
-
-4.选择Quartz Scheduler，点击next。
-
-5.Content_root和Modul...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-17</span><i class="fa fa-tag"></i></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/page/7/">上一页</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/page/9/">下一页</a></li></ul></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
+3.mongodb-win...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-02-18</span><i class="fa fa-tag"></i></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/page/7/">上一页</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/page/9/">下一页</a></li></ul></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script></body></html>
