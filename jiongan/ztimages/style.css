@@ -1,0 +1,425 @@
+/* CSS Document */
+
+body{
+	margin: 0px; padding: 0px;
+	font-size: 14px; line-height: 200%;
+	font-family:ËÎÌå, Arial, Helvetica, sans-serif;
+	background-color:#AF92B1;
+	color:#715032;
+
+}
+div{
+	height: auto ; 
+}
+ul{
+	margin: 0px; padding: 0px;
+}
+li{
+	margin:0px; padding:0px;list-style: none ;
+}
+dl,dt,dd{
+	margin: 0px; padding: 0px; height:auto;
+
+}
+p{
+	margin: 0px; padding: 0px;height:auto;
+
+}
+img{
+	border: none;
+}
+
+a:link ,a:visited {
+	color: #990000;
+	text-decoration: none ;
+}
+a:hover ,a:active {
+	color: #ff6633; 
+	text-decoration: underline ;
+}
+h1{
+	font-size: 22px; margin:0px; padding: 0px;overflow: hidden ;
+
+}
+h2{
+	font-size: 20px; margin:0px; padding: 0px;overflow: hidden ;
+
+}
+h3{
+	font-size: 18px; margin:0px; padding: 0px;overflow: hidden ;
+
+}
+h4{
+	font-size: 16px; margin:0px; padding: 0px;overflow: hidden ;
+
+}
+h5{
+	font-size: 14px; margin:0px; padding: 0px;overflow: hidden ;
+
+}
+h6{
+	font-size: 12px; margin:0px; padding: 0px;overflow: hidden ;
+
+}
+.clearBoth{ clear:both; height:0px; line-height:0px; overflow:hidden;}
+
+
+
+
+.bannerbox{
+	width:100%;
+	margin: 0px auto;
+	background-image: url(toutu2.png);
+	background-repeat: no-repeat;
+	background-position: center top;
+}
+.banner{
+	width:980px; overflow: hidden ; margin: 0px auto ;
+}
+
+
+.toutiao {
+	width: aoto;
+	margin: 8px;
+
+}
+.toutiao h2 {
+	text-align: center;  font-size:14px; font-weight:bold;
+}
+.toutiao h2 a:link {
+	color: #990000;
+}
+.toutiao h2 a:visited {
+	color: #990000;
+}
+.toutiao h2 a:hover {
+	color: #ff6633;
+}
+.toutiao {
+	width: aoto;
+	margin: 8px;
+
+}
+.toutiao00 {
+	width: aoto;
+	margin: 8px;
+	background-color:#FACFD0;
+
+}
+.toutiao00 h2 {
+	text-align: center;  font-size:14px; font-weight:bold; 
+}
+.toutiao00 h2 a:link {
+	color: #990000;
+}
+.toutiao00 h2 a:visited {
+	color: #990000;
+}
+.toutiao00 h2 a:hover {
+	color: #ff6633;
+}
+.toutiao2 h2 {
+	text-align: center;  font-size:14px; font-weight:bold;
+}
+.toutiao2 h2 a:link {
+	color: #990000;
+}
+.toutiao2 h2 a:visited {
+	color: #990000;
+}
+.toutiao2 h2 a:hover {
+	color: #000099;
+}
+.toutiao3 h2 {
+	text-align: center;  font-size:14px; font-weight:bold;
+}
+.toutiao3 h2 a:link {
+	color: #990000;
+}
+.toutiao3 h2 a:visited {
+	color: #990000;
+}
+.toutiao3 h2 a:hover {
+	color: #000099;
+}
+.toutiao h3 {
+	text-align: left;  font-size:20px; font-weight:bold; color:#990000; line-height:40px;  font-family:"Î¢ÈíÑÅºÚ";
+}
+.toutiao h3 img{
+	margin-left:10px;
+}
+.toutiao h4 {
+	text-align: center;  font-size:30px; font-weight:bold;color:#990000; line-height:40px;  font-family:"Î¢ÈíÑÅºÚ";
+}
+.toutiao p {
+	padding: 0px 5px 0px 7px;
+	text-indent: 24px;
+	line-height: 24px;
+	padding-bottom: 5px;
+	font-size:12px
+}
+.toutiao span {
+	text-align: right;  font-size:14px; font-weight:bold;
+}
+
+.toutiao00 p {
+	padding: 0px 5px 0px 7px;
+	text-align:center;
+	line-height: 24px;
+	padding-bottom: 5px;
+	font-size:14px
+}
+.toutiao00 span {
+	text-align: right;  font-size:14px; font-weight:bold;
+}
+
+
+.toutiao2 {
+	width: aoto;
+	margin: 8px;
+
+
+
+}
+.toutiao2 span {
+	text-align: right;  font-size:14px; font-weight:bold;
+}
+.toutiao2 p {
+	padding: 0px 5px 0px 7px;
+
+	line-height: 24px;
+	padding-bottom: 5px;
+	font-size:12px
+}
+
+.toutiao3 {
+	width: aoto; 
+	margin: 12px 8px 8px 3px;
+
+
+}
+.toutiao3 span {
+	text-align: right;  font-size:14px; font-weight:bold;
+}
+.toutiao3 p {
+	padding: 0px 5px 0px 7px;
+	text-indent: 24px;
+	line-height: 24px;
+	padding-bottom: 5px;
+	font-size:12px
+}
+
+.zcjd img{
+    height: 160px;
+    vertical-align: top;
+    width: 215px;
+	border:#CCCCCC solid 1px;
+	padding:5px;
+	margin:5px 5px 5px 9px;
+}
+.zcjd p{
+	font-size:12px;
+    padding: 0px 5px 0px 7px;
+	line-height: 24px;
+	padding-bottom: 5px;
+}
+.zcjd span{
+	color:#FF0000;
+	font-weight:bold;
+
+
+}
+
+.hz{
+	border:#4EA2C6 solid 1px;
+	margin:10px;
+	height:377px;
+
+
+
+
+}
+.hz img{
+    height: 100px;
+    vertical-align: top;
+    width: 240px;
+	border:#CCCCCC solid 1px;
+	margin:10px;
+	
+
+}
+.hz p{
+	text-indent:24px;
+	font-size:12px;
+    padding: 10px;
+	line-height: 24px;
+	padding-bottom: 5px;
+
+	
+}
+
+.bm{
+    
+	border:#BEDFFF solid 1px;
+	width:250px;
+	height:240px;
+	margin-top:2px;
+	
+	
+}
+.qz {
+	float: left;
+	overflow: hidden;
+	margin-left: 10px;
+	width: 350px;
+}
+.qz ul {
+	overflow: hidden;
+}
+.qz ul li {
+	background: url('ding.jpg') left 4px no-repeat;
+	line-height: 22px;
+	padding-left: 20px;
+	font-size: 12px;
+	overflow: hidden;
+	margin-top: 5px;
+}
+
+.hdlc p{
+	font-size:12px;
+	margin:10px;
+	line-height: 24px;
+	padding-left: 10px;
+
+
+}
+.jhjs{
+	font-size:12px;
+	line-height: 24px;
+	margin:10px;
+	text-indent: 24px;
+
+
+
+}
+
+.list1{
+   font-size:12px;
+	line-height: 24px;
+	margin:10px;
+	padding-bottom: 5px;
+}
+
+.hx img{
+    height: 180px;
+    vertical-align: top;
+    width: 230px;
+	border:#CCCCCC solid 1px ;
+	margin:5px;
+	padding:1px;
+	
+
+}
+.daoyu p{
+	text-indent:28px;
+	font-size:16px;
+    padding: 2px 40px 2px 40px;
+	line-height: 30px;
+
+
+
+
+}
+
+.news_list1 {
+    clear: both;
+    margin: 5px 10px;
+}
+.news_list1 li {
+    background: url("ding.gif") no-repeat scroll left 9px rgba(0, 0, 0, 0);
+    font-size: 14px;
+    height: 24px;
+    line-height: 24px;
+    text-indent: 12px;
+}
+
+.wzline p{
+
+margin-left:20px;
+ font-family:'ËÎÌå';
+  font-size:14px;
+   color:#523342;
+   line-height:24px;
+
+}
+.wzline p a:link  {
+	color: #523342;
+}
+ .wzline p a:visited  {
+	color: #523342;
+}
+.wzline  p a:hover {
+	color: #ff6633;
+}
+.jp{
+margin-left:50px;
+
+}
+
+/* ¹ö¶¯ */
+#mingdan { width:360px; height:148px; overflow:hidden;}
+#mingdan li { width:360px; height:21px; overflow:hidden;}
+#mingdan li span { font-size:14px; color:#eb6100; margin-right:16px; margin-left:12px;}
+#mingdan li em { font-size:14px; font-weight:bold; color:#FF0000; margin-left:12px;}
+
+.title{
+	font-size:30px;
+	line-height:60px;
+	font-weight:bold;
+	padding-top:5px;
+	margin:10px 10px 10px 2px;
+	
+
+
+
+}
+.title1{
+	font-size:20px;
+	font-weight:bold;
+	padding-top:5px;
+	text-align:center;
+	margin-top:2px;
+	
+
+}
+.title2{
+	font-size:16px;
+
+	padding-top:5px;
+	text-align:center;
+	margin-top:2px;
+	margin-bottom:10px;
+	
+
+}
+.lp{
+	background:url(bg01.png) no-repeat;
+	width:245px;
+
+
+}
+.lp img{
+    height: 143px;
+    vertical-align: top;
+    width: 202px;
+ 	margin:10px 40px 5px 21px;
+
+
+}
+.lp p{
+	font-size:12px;
+    padding: 0px 5px 0px 7px;
+	line-height: 24px;
+	padding-bottom: 5px;
+
+}
