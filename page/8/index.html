@@ -8,7 +8,17 @@
 Sourcetree simplifies how you interact with your Git rep...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-04-22</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/04/22/Bandwagonhost-IP/">Bandwagonhost 切换 IP</a></h3></div><div class="post-content"><p>背景1.能ping通服务器IP。2.不能通过tcping使用ssh、ssr服务的端口。3.帮瓦工后台能正常访问。
 步骤一：先换个ssh端口号，尝试将远程连接重现123456789101.更换端口为18724：vi /etc/ssh/sshd_configPort 18724 #修改为187242.直接重启：reb...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-04-22</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/04/09/ssh-maven-install/">使用 MAVEN 搭建 SSH</a></h3></div><div class="post-content"><p>    重点参考了sxjlinux的博客《idea使用Maven创建web服务，并搭建ssh框架使用tomcat运行》搭建，https://blog.csdn.net/sunxiaoju/article/details/81007709
 
-1.我们创建一个新的项目，选择Maven，并使用Maven搭建一个web的...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-04-09</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/03/13/networkProtocol-basic/">网络协议 - 基础知识点</a></h3></div><div class="post-content"><p>笔记区域，未整理12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-13</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/03/09/designPattern-observerPattern/">设计模式 - 观察者模式</a></h3></div><div class="post-content"><p>感想引用runoob.com上面的一句话：一个对象（目标对象）的状态发生改变，所有的依赖对象（观察者对象）都将得到通知，进行广播通知。
+1.我们创建一个新的项目，选择Maven，并使用Maven搭建一个web的...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-04-09</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/03/13/networkProtocol-basic/">网络协议 - 基础知识点</a></h3></div><div class="post-content"><p>笔记区域，未整理只有通过这种协议，计算机才知道我们想让它做什么。
+
+编译过程：
+源文件 -&gt; 词法分析 -&gt; 语法分析 -&gt; 语义分析 -&gt; 代码生成 -&gt; 目标文件
+
+协议三要素：
+语法，就是这一段内容要符合一定的规则和格式。
+语义，就是这一段内容要代表某种意义。
+顺序。
+
+只有通...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-13</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/03/09/designPattern-observerPattern/">设计模式 - 观察者模式</a></h3></div><div class="post-content"><p>感想引用runoob.com上面的一句话：一个对象（目标对象）的状态发生改变，所有的依赖对象（观察者对象）都将得到通知，进行广播通知。
 以下以老师讲解答案为例子，分析观察者模式。
 1.模式结构
 
