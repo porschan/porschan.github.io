@@ -809,5 +809,82 @@ HTTPS是综合了对称加密和非对称加密算法的HTTP协议。既保证�
 <li>一种开源的虚拟交换机的实现OpenvSwitch，它能对经过自己的包做任意修改，从而使得云对网络的控制十分灵活；</li>
 <li>将OpenvSwitch引入了云之后，可以使得配置简单而灵活，并且可以解耦物理网络和虚拟网络。</li>
 </ul>
+<p>所以<strong>对于公有云上的虚拟机，我的建议是仅仅开放需要的端口，而将其他的端口一概关闭。这个时候，你只要通过安全措施守护好这个唯一的入口就可以了</strong>。采用的方式常常是用<strong>ACL</strong>（Access Control List，访问控制列表）来控制IP和端口。</p>
+<p>设置好了这些规则，只有指定的IP段能够访问指定的开放接口，就算有个有漏洞的后台进程在那里，也会被屏蔽，黑客进不来。在云平台上，这些规则的集合常称为<strong>安全组</strong>。那安全组怎么实现呢？</p>
+<p>首先拿下MAC头看看，是不是我的。如果是，则拿下IP头来。得到目标IP之后呢，就开始进行路由判断。在路由判断之前，这个节点我们称为<strong>PREROUTING</strong>。如果发现IP是我的，包就应该是我的，就发给上面的传输层，这个节点叫作<strong>INPUT</strong>。如果发现IP不是我的，就需要转发出去，这个节点称为<strong>FORWARD</strong>。如果是我的，上层处理完毕完毕后，一般会返回一个处理结果，这个处理结果会发出去，这个节点称为<strong>OUTPUT</strong>，无论是FORWARD还是OUTPUT，都是路由判断之后发生的，最后一个节点是<strong>POSTROUTING</strong>。</p>
+<p>整个包的处理过程还是原来的过程，只不过为什么要格外关注这<strong>五个节点</strong>呢？</p>
+<p>是因为在Linux内核中，有一个框架叫Netfilter。它可以在这些节点插入hook函数。这些函数可以截获数据包，对数据包进行干预。例如做一定的修改，然后决策是否接着交给TCP/IP协议栈处理；或者可以交回给协议栈，那就是<strong>ACCEPT</strong>；或者过滤掉，不再传输，就是<strong>DROP</strong>；还有就是<strong>QUEUE</strong>，发送给某个用户态进程处理。</p>
+<p>这个比较难理解，经常用在内部负载均衡，就是过来的数据一会儿传给目标地址1，一会儿传给目标地址2，而且目标地址的个数和权重都可能变。协议栈往往处理不了这么复杂的逻辑，需要写一个函数接管这个数据，实现自己的逻辑。</p>
+<p>有了这个Netfilter框架就太好了，你可以在IP转发的过程中，随时干预这个过程，只要你能实现这些hook函数。</p>
+<p>一个著名的实现，就是<strong>内核模块ip_tables</strong>。它在这五个节点上埋下函数，从而可以根据规则进行包的处理。按功能可分为四大类：连接跟踪（conntrack）、数据包的过滤（filter）、网络地址转换（nat）和数据包的修改（mangle）。其中连接跟踪是基础功能，被其他功能所依赖。其他三个可以实现包的过滤、修改和网络地址转换。</p>
+<p>在用户态，还有一个你肯定知道的客户端程序iptables，用命令行来干预内核的规则。内核的功能对应iptables的命令行来讲，就是<strong>表和链</strong>的概念。</p>
+<p>iptables的表分为四种：raw–&gt;mangle–&gt;nat–&gt;filter。这四个优先级依次降低，raw不常用，所以主要功能都在其他三种表里实现。每个表可以设置多个链。</p>
+<p>filter表处理过滤功能，主要包含三个链：</p>
+<ul>
+<li>INPUT链：过滤所有目标地址是本机的数据包；</li>
+<li>FORWARD链：过滤所有路过本机的数据包；</li>
+<li>OUTPUT链：过滤所有由本机产生的数据包。</li>
+</ul>
+<p>nat表主要是处理网络地址转换，可以进行Snat（改变数据包的源地址）、Dnat（改变数据包的目标地址），包含三个链：</p>
+<ul>
+<li>PREROUTING链：可以在数据包到达防火墙时改变目标地址；</li>
+<li>OUTPUT链：可以改变本地产生的数据包的目标地址；</li>
+<li>POSTROUTING链：在数据包离开防火墙时改变数据包的源地址。</li>
+</ul>
+<p>mangle表主要是修改数据包，包含：</p>
+<ul>
+<li>PREROUTING链；</li>
+<li>INPUT链；</li>
+<li>FORWARD链；</li>
+<li>OUTPUT链；</li>
+<li>POSTROUTING链。</li>
+</ul>
+<p>将iptables的表和链加入到上面的过程图中，就形成了下面的图和过程。</p>
+<ol>
+<li>数据包进入的时候，先进mangle表的PREROUTING链。在这里可以根据需要，改变数据包头内容之后，进入nat表的PREROUTING链，在这里可以根据需要做Dnat，也就是目标地址转换。</li>
+<li>进入路由判断，要判断是进入本地的还是转发的。</li>
+<li>如果是进入本地的，就进入INPUT链，之后按条件过滤限制进入。</li>
+<li>之后进入本机，再进入OUTPUT链，按条件过滤限制出去，离开本地。</li>
+<li>如果是转发就进入FORWARD链，根据条件过滤限制转发。</li>
+<li>之后进入POSTROUTING链，这里可以做Snat，离开网络接口。</li>
+</ol>
+<p>有了iptables命令，我们就可以在云中实现一定的安全策略。例如我们可以处理前面的偷窥事件。首先我们将所有的门都关闭。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t filter -A INPUT -s 0.0.0.0/0.0.0.0 -d X.X.X.X -j DROP</span><br></pre></td></tr></table></figure>
+<p>-s表示源IP地址段，-d表示目标地址段，DROP表示丢弃，也即无论从哪里来的，要想访问我这台机器，全部拒绝，谁也黑不进来。</p>
+<p>但是你发现坏了，ssh也进不来了，都不能远程运维了，可以打开一下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -I INPUT -s 0.0.0.0/0.0.0.0 -d X.X.X.X -p tcp --dport 22 -j ACCEPT</span><br></pre></td></tr></table></figure>
+<p>如果这台机器是提供的是web服务，80端口也应该打开，当然一旦打开，这个80端口就需要很好的防护，但是从规则角度还是要打开。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -s 0.0.0.0/0.0.0.0 -d X.X.X.X -p tcp --dport 80 -j ACCEPT</span><br></pre></td></tr></table></figure>
+<p>这样就搞定了，其他的账户都封死，就一个防盗门可以进出，只要防盗门是五星级的，就比较安全了。</p>
+<p>这些规则都可以在虚拟机里，自己安装iptables自己配置。但是如果虚拟机数目非常多，都要配置，对于用户来讲就太麻烦了，能不能让云平台把这部分工作做掉呢？</p>
+<p>当然可以了。在云平台上，一般允许一个或者多个虚拟机属于某个安全组，而属于不同安全组的虚拟机之间的访问以及外网访问虚拟机，都需要通过安全组进行过滤。</p>
+<p>为了方便运维，我们创建两个安全组，将Tomcat所在的虚拟机放在安全组A里面。在安全组A里面，允许任意IP地址0.0.0.0/0访问8080端口，但是对于ssh的22端口，仅仅允许管理员网段203.0.113.0/24访问。</p>
+<p>我们将MySQL所在的虚拟机在安全组B里面。在安全组B里面，仅仅允许来自安全组A的机器访问3306端口，但是对于ssh的22端口，同样允许管理员网段203.0.113.0/24访问。</p>
+<p>这些安全组规则都可以自动下发到每个在安全组里面的虚拟机上，从而控制一大批虚拟机的安全策略。这种批量下发是怎么做到的呢？你还记得这幅图吗？</p>
+<p>两个VM都通过tap网卡连接到一个网桥上，但是网桥是二层的，两个VM之间是可以随意互通的，因而需要有一个地方统一配置这些iptables规则。</p>
+<p>可以多加一个网桥，在这个网桥上配置iptables规则，将在用户在界面上配置的规则，放到这个网桥上。然后在每台机器上跑一个Agent，将用户配置的安全组变成iptables规则，配置在这个网桥上。</p>
+<p>安全问题解决了，iptables真强大！别忙，iptables除了filter，还有nat呢，这个功能也非常重要。</p>
+<p>前面的章节我们说过，在设计云平台的时候，我们想让虚拟机之间的网络和物理网络进行隔离，但是虚拟机毕竟还是要通过物理网和外界通信的，因而需要在出物理网的时候，做一次网络地址转换，也即nat，这个就可以用iptables来做。</p>
+<p>我们学过，IP头里面包含源IP地址和目标IP地址，这两种IP地址都可以转换成其他地址。转换源IP地址的，我们称为Snat；转换目标IP地址的，我们称为Dnat。</p>
+<p>你有没有思考过这个问题，TCP的访问都是一去一回的，而你在你家里连接WIFI的IP地址是一个私网IP，192.168.1.x。当你通过你们家的路由器访问163网站之后，网站的返回结果如何能够到达你的笔记本电脑呢？肯定不能通过192.168.1.x，这是个私网IP，不具有公网上的定位能力，而且用这个网段的人很多，茫茫人海，怎么能够找到你呢？</p>
+<p>所以当你从你家里访问163网站的时候，在你路由器的出口，会做Snat的，运营商的出口也可能做Snat，将你的私网IP地址，最终转换为公网IP地址，然后163网站就可以通过这个公网IP地址返回结果，然后再nat回来，直到到达你的笔记本电脑。</p>
+<p>云平台里面的虚拟机也是这样子的，它只有私网IP地址，到达外网网口要做一次Snat，转换成为机房网IP，然后出数据中心的时候，再转换为公网IP。</p>
+<p>这里有一个问题是，在外网网口上做Snat的时候，是全部转换成一个机房网IP呢，还是每个虚拟机都对应一个机房网IP，最终对应一个公网IP呢？前面也说过了，公网IP非常贵，虚拟机也很多，当然不能每个都有单独的机房网和公网IP了，于是这种Snat是一种特殊的Snat，MASQUERADE（地址伪装）。</p>
+<p>这种方式下，所有的虚拟机共享一个机房网和公网的IP地址，所有从外网网口出去的，都转换成为这个IP地址。那又一个问题来了，都变成一个公网IP了，当163网站返回结果的时候，给谁呢，再nat成为哪个私网的IP呢？</p>
+<p>这就是Netfilter的连接跟踪（conntrack）功能了。对于TCP协议来讲，肯定是上来先建立一个连接，可以用“源/目的IP+源/目的端口”唯一标识一条连接，这个连接会放在conntrack表里面。当时是这台机器去请求163网站的，虽然源地址已经Snat成公网IP地址了，但是conntrack表里面还是有这个连接的记录的。当163网站返回数据的时候，会找到记录，从而找到正确的私网IP地址。</p>
+<p>这是虚拟机做客户端的情况，如果虚拟机做服务器呢？也就是说，如果虚拟机里面部署的就是163网站呢？</p>
+<p>这个时候就需要给这个网站配置固定的物理网的IP地址和公网IP地址了。这时候就需要显示的配置Snat规则和Dnat规则了。</p>
+<p>当外部访问进来的时候，外网网口会通过Dnat规则将公网IP地址转换为私网IP地址，到达虚拟机，虚拟机里面是163网站，返回结果，外网网口会通过Snat规则，将私网IP地址转换为那个分配给它的固定的公网IP地址。</p>
+<p>类似的规则如下：</p>
+<ul>
+<li>源地址转换(Snat)：iptables -t nat -A -s 私网IP -j Snat –to-source 外网IP</li>
+<li>目的地址转换(Dnat)：iptables -t nat -A -PREROUTING -d 外网IP -j Dnat –to-destination 私网IP</li>
+</ul>
+<p>到此为止iptables解决了非法偷窥隐私的问题。</p>
+<h2 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h2><p>好了，这一节就讲到这里了，我们来总结一下。</p>
+<ul>
+<li>云中的安全策略的常用方式是，使用iptables的规则，请记住它的五个阶段，PREROUTING、INPUT、FORWARD、OUTPUT、POSTROUTING。</li>
+<li>iptables分为四种表，raw、mangle、nat、filter。其中安全策略主要在filter表中实现，而虚拟网络和物理网络地址的转换主要在nat表中实现。</li>
+</ul>
 </div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-13</span><i class="fa fa-tag"></i></div></div></div></div><div class="cc"><a href="http://creativecommons.org/licenses/by-sa/4.0/"><img src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a></div><div class="cc_tips">本作品采用<a href="http://creativecommons.org/licenses/by-sa/4.0/">知识共享署名-相同方式共享 4.0 国际许可协议</a>进行许可。
 <span id="busuanzi_container_page_pv"></span>本文总阅读量：<span id="busuanzi_value_page_pv"></span></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2019/04/09/ssh-maven-install/" title="使用 MAVEN 搭建 SSH">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/03/09/designPattern-observerPattern/" title="设计模式 - 观察者模式">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>
