@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>海底捞</title>
+  <link rel="stylesheet" href="./css/index.css">
+  <link rel="stylesheet" href="./css/model.css">
+  <link rel="stylesheet" href="./css/tiwen.css">
+  <link rel="stylesheet" href="./css/chaxun.css">
+  <!-- <link rel="stylesheet" href="./css/share.css"> -->
+  <link rel="stylesheet" href="./css/beijing.css">
+
+  <!-- start edit 20190616 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+  <!-- end edit 20190616 -->
+
+  <script type="text/javascript">
+    document.documentElement.style.fontSize = document.documentElement.clientWidth / 640 * 100 + 'px';
+  </script>
+</head>
+
+<body>
+  <!-- 首页 -->
+  <div id="index" style="height: 100%;margin: 0 ;padding: 0;font-size: 0.32rem">
+    <div class="layout">
+      <div class="header">
+        <div class="img"></div>
+        <div class="text">
+          <span class="one">庆祝海底捞成功上市！</span>
+          <br>
+          <div class="two">
+            <span class="redpac">全名派发现金红包</span>
+            <span class="example">可提现</span>
+          </div>
+        </div>
+        <!-- 动画类名 -->
+        <div class="open">
+          <div class="open1">
+            <div class="open2" id="donghua">開</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="title">- 今日已有2576人领了红包 -</div>
+        <div class="hiBox">
+          <div style="height: 50px;" class="animated infinite fadeInUp delay-1s">
+            <img src="img/tempPic.png">
+          </div>
+          <ul></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 领取页 -->
+  <div id="model" class="m-kongzhi" style="height: 100%;margin: 0 ;padding: 0;font-size: 0.32rem">
+    <div class="m-layout">
+      <div class="m-header">
+        <div class="m-open">
+          ￥
+        </div>
+      </div>
+      <div class="m-footer">
+        <div class="m-text">
+          <span class="m-play">恭喜领取红包</span><br>
+          <div class="m-price">
+            <span class="m-money">￥</span>
+            <span class="m-nums">107.05</span>
+            <span class="m-hi">最高</span>
+          </div>
+        </div>
+        <div class="m-dataBox">
+          <div class="m-pro">
+            <div class="m-box1">
+              <div id="tixian">立即领取红包</div>
+            </div>
+            <div class="m-box2">
+              <p>今日24点前未收钱，将收回红包资格</p>
+              <p>
+                如多次锁取以最后一次领取金额为准
+              </p>
+            </div>
+          </div>
+          <div class="m-two">
+            总共100000份，已成功发出57887份红包
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 提问页 -->
+  <!-- 蒙版 -->
+  <div id="tiwenye" class="mengban">
+    <div class="t-login">
+      <div class="t-title">海底捞成立于哪一年？</div>
+      <div class="t-box_big" style="font-size:.24rem;text-align: center;margin-top: .25rem;">
+        <span>活动</span><span>限量限时</span>答题即可参与领取</br>现金红包!
+      </div>
+      <div class="t-button">
+        <span id="cancel">1997年</span>
+        <span id="canfim">1998年</span>
+      </div>
+    </div>
+  </div>
+  <!-- 查询页 -->
+  <div id="chaxunye" class="chaxun" style="height: 100%;margin: 0 ;padding: 0;font-size: 0.35rem">
+    <div class="beijing" style="height: 100%;margin: 0 ;padding: 0;font-size: 0.35rem">
+      <div class="t-layout">
+        <div class="t-top">
+          <div style="font-size:.5rem;
+          font-weight: bolder;
+          color: rgb(216, 89, 64);">分享点这里</div>
+          <div class="img"></div>
+        </div>
+        <div class="t-content">
+          <div class="weixin">点击右上角，分享到
+            <span style="font-size:.5rem"><i class="fenxiang iconfont iconfenxiang"></i>
+            </span>
+            <span style="font-size:.5rem;font-weight:bolder;color:rgb(241, 163, 35)">微信群</span>
+          </div>
+          <div class="ok">
+            即可领取￥<span style="font-size:.5rem;font-weight:bolder;color:rgb(241, 163, 35)">75.70</span>￥
+          </div>
+        </div>
+        <div class="t-bottom">
+          <div class="image"></div>
+          <div class="fa">恭喜发财</div>
+          <div class="m-cir">
+            ￥
+          </div>
+        </div>
+      </div>
+    </div>
+      <div class="congratulation">
+        <div class="model">
+          <div id="huanchong">
+            <img id="imgbox" src="./img/1.gif" width="50px">
+          </div>
+    
+          <p id="chaxuntxt">正在查询红包数据...</p>
+        </div>
+      </div>
+  </div>
+  
+  <!-- 背景页 -->
+  <div id="beijingye" style="height: 100%;margin: 0 ;padding: 0;font-size: 0.35rem">
+    <div class="t-layout">
+      <div class="t-top">
+        <div style="font-size:.5rem;
+        font-weight: bolder;
+        color: rgb(216, 89, 64);">分享点这里</div>
+        <div class="img"></div>
+      </div>
+      <div class="t-content">
+        <div class="weixin">点击右上角，分享到
+          <span style="font-size:.5rem"><i class="fenxiang iconfont iconfenxiang"></i>
+          </span>
+          <span style="font-size:.5rem;font-weight:bolder;color:rgb(241, 163, 35)">微信群</span>
+        </div>
+        <div class="ok">
+          即可领取￥<span style="font-size:.5rem;font-weight:bolder;color:rgb(241, 163, 35)">75.70</span>￥
+        </div>
+      </div>
+      <div class="t-bottom">
+        <div class="image"></div>
+        <div class="fa">恭喜发财</div>
+        <div class="m-cir">
+          ￥
+        </div>
+      </div>
+    </div>
+    </div>
+
+  <!-- 分享页 -->
+  <!-- <div id="shareye" class="imgbox">
+      <img src="./img/beijing.png" width="100%" height="100%">
+      <div class="congratulation">
+        <div class="conetxt">
+          <p style="font-size:.45rem;font-weight: bolder;color: rgb(31, 189, 157)">恭喜您</p>
+          <p style="color:#999;margin: .2rem 0;">您获得现金红包</p>
+          <p style="font-size:.45rem;font-weight: bolder;color: red;">107.05元</p><br>
+          <div>
+            <span style="color: red">领取要求：</span>
+            <span>您只需要分享到微信群</span>
+          </div>
+          <p style="font-size: .4rem;color: red; margin: .1rem 0;">即可领取现金红包</p>
+          <p>完成后自动存入您的微信钱包</p><br>
+          <div class="end" style="color: #999;">
+            <p>红包总金额仅剩1523.00万元，先</p>
+            <p>到先得，活动经微信认证，真实有效</p>
+          </div>
+        </div>
+        <div class="share" style="font-size:.45rem;color: red;">分享领取</div>
+      </div>
+    </div> -->
+
+</div>
+<script src="./js/jquery-2.2.2.min.js"></script>
+<script src="./js/index.js"></script>
+
+</html>
+<script>
+$(function () {
+
+  $('#model').hide();
+  $('#tiwenye').hide();
+  $('#chaxunye').hide();
+  // $('#shareye').hide();
+  $('#beijingye').hide();
+  $('#donghua').click(function () {
+    $('#donghua').addClass('a')
+    setTimeout(() => {
+      $('#index').hide();
+      $('#model').fadeIn("slow");
+    }, 1000);
+  });
+  $('#tixian').click(function () {
+    $('#tiwenye').show();
+  })
+  $('#cancel').click(function(){
+    $('#model').hide();
+    $('#tiwenye').hide();
+    $('#chaxunye').show();
+    setTimeout(() => {
+      $('#chaxunye').hide();
+      $('#beijingye').show();
+    }, 1000);
+  })
+  $('#canfim').click(function(){
+    $('#model').hide();
+    $('#tiwenye').hide();
+    $('#chaxunye').show();
+    setTimeout(() => {
+      $('#chaxunye').hide();
+      $('#beijingye').show();
+    }, 1000);
+  })
+})
+</script>
