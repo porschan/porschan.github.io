@@ -886,5 +886,136 @@ HTTPS是综合了对称加密和非对称加密算法的HTTP协议。既保证�
 <li>云中的安全策略的常用方式是，使用iptables的规则，请记住它的五个阶段，PREROUTING、INPUT、FORWARD、OUTPUT、POSTROUTING。</li>
 <li>iptables分为四种表，raw、mangle、nat、filter。其中安全策略主要在filter表中实现，而虚拟网络和物理网络地址的转换主要在nat表中实现。</li>
 </ul>
+<p>在云平台上，也有这种现象，好在有一种流量控制的技术，可以实现<strong>QoS</strong>（Quality of Service），从而保障大多数用户的服务质量。</p>
+<p>对于控制一台机器的网络的QoS，分两个方向，一个是入方向，一个是出方向。</p>
+<p>其实我们能控制的只有出方向，通过Shaping，将出的流量控制成自己想要的模样。而进入的方向是无法控制的，只能通过Policy将包丢弃。</p>
+<h2 id="控制网络的QoS有哪些方式？"><a href="#控制网络的QoS有哪些方式？" class="headerlink" title="控制网络的QoS有哪些方式？"></a>控制网络的QoS有哪些方式？</h2><p>在Linux下，可以通过TC控制网络的QoS，主要就是通过队列的方式。</p>
+<h3 id="无类别排队规则"><a href="#无类别排队规则" class="headerlink" title="无类别排队规则"></a>无类别排队规则</h3><p>第一大类称为<strong>无类别排队规则</strong>（Classless Queuing Disciplines）。还记得我们讲<a href="https://time.geekbang.org/column/article/7772" target="_blank" rel="noopener">ip addr</a>的时候讲过的<strong>pfifo_fast</strong>，这是一种不把网络包分类的技术。</p>
+<p>pfifo_fast分为三个先入先出的队列，称为三个Band。根据网络包里面TOS，看这个包到底应该进入哪个队列。TOS总共四位，每一位表示的意思不同，总共十六种类型。</p>
+<p>通过命令行tc qdisc show dev eth0，可以输出结果priomap，也是十六个数字。在0到2之间，和TOS的十六种类型对应起来，表示不同的TOS对应的不同的队列。其中Band 0优先级最高，发送完毕后才轮到Band 1发送，最后才是Band 2。</p>
+<p>另外一种无类别队列规则叫作<strong>随机公平队列</strong>（Stochastic Fair Queuing）。</p>
+<p>会建立很多的FIFO的队列，TCP Session会计算hash值，通过hash值分配到某个队列。在队列的另一端，网络包会通过轮询策略从各个队列中取出发送。这样不会有一个Session占据所有的流量。</p>
+<p>当然如果两个Session的hash是一样的，会共享一个队列，也有可能互相影响。hash函数会经常改变，从而session不会总是相互影响。</p>
+<p>还有一种无类别队列规则称为<strong>令牌桶规则</strong>（TBF，Token Bucket Filte）。</p>
+<p>所有的网络包排成队列进行发送，但不是到了队头就能发送，而是需要拿到令牌才能发送。</p>
+<p>令牌根据设定的速度生成，所以即便队列很长，也是按照一定的速度进行发送的。</p>
+<p>当没有包在队列中的时候，令牌还是以既定的速度生成，但是不是无限累积的，而是放满了桶为止。设置桶的大小为了避免下面的情况：当长时间没有网络包发送的时候，积累了大量的令牌，突然来了大量的网络包，每个都能得到令牌，造成瞬间流量大增。</p>
+<h3 id="基于类别的队列规则"><a href="#基于类别的队列规则" class="headerlink" title="基于类别的队列规则"></a>基于类别的队列规则</h3><p>另外一大类是<strong>基于类别的队列规则</strong>（Classful Queuing Disciplines），其中典型的为<strong>分层令牌桶规则</strong>（<strong>HTB</strong>， Hierarchical Token Bucket）。</p>
+<p>HTB往往是一棵树，接下来我举个具体的例子，通过TC如何构建一棵HTB树来带你理解。</p>
+<p>使用TC可以为某个网卡eth0创建一个HTB的队列规则，需要付给它一个句柄为（1:）。</p>
+<p>这是整棵树的根节点，接下来会有分支。例如图中有三个分支，句柄分别为（:10）、（:11）、（:12）。最后的参数default 12，表示默认发送给1:12，也即发送给第三个分支。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tc qdisc add dev eth0 root handle 1: htb default 12</span><br></pre></td></tr></table></figure>
+<p>对于这个网卡，需要规定发送的速度。一般有两个速度可以配置，一个是<strong>rate</strong>，表示一般情况下的速度；一个是<strong>ceil</strong>，表示最高情况下的速度。对于根节点来讲，这两个速度是一样的，于是创建一个root class，速度为（rate=100kbps，ceil=100kbps）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tc class add dev eth0 parent 1: classid 1:1 htb rate 100kbps ceil 100kbps</span><br></pre></td></tr></table></figure>
+<p>接下来要创建分支，也即创建几个子class。每个子class统一有两个速度。三个分支分别为（rate=30kbps，ceil=100kbps）、（rate=10kbps，ceil=100kbps）、（rate=60kbps，ceil=100kbps）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tc class add dev eth0 parent 1:1 classid 1:10 htb rate 30kbps ceil 100kbps</span><br><span class="line">tc class add dev eth0 parent 1:1 classid 1:11 htb rate 10kbps ceil 100kbps</span><br><span class="line">tc class add dev eth0 parent 1:1 classid 1:12 htb rate 60kbps ceil 100kbps</span><br></pre></td></tr></table></figure>
+<p>你会发现三个rate加起来，是整个网卡允许的最大速度。</p>
+<p>HTB有个很好的特性，同一个root class下的子类可以相互借流量，如果不直接在队列规则下面创建一个root class，而是直接创建三个class，它们之间是不能相互借流量的。借流量的策略，可以使得当前不使用这个分支的流量的时候，可以借给另一个分支，从而不浪费带宽，使带宽发挥最大的作用。</p>
+<p>最后，创建叶子队列规则，分别为<strong>fifo</strong>和<strong>sfq</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tc qdisc add dev eth0 parent 1:10 handle 20: pfifo limit 5</span><br><span class="line">tc qdisc add dev eth0 parent 1:11 handle 30: pfifo limit 5</span><br><span class="line">tc qdisc add dev eth0 parent 1:12 handle 40: sfq perturb 10</span><br></pre></td></tr></table></figure>
+<p>基于这个队列规则，我们还可以通过TC设定发送规则：从1.2.3.4来的，发送给port 80的包，从第一个分支1:10走；其他从1.2.3.4发送来的包从第二个分支1:11走；其他的走默认分支。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tc filter add dev eth0 protocol ip parent 1:0 prio 1 u32 match ip src 1.2.3.4 match ip dport 80 0xffff flowid 1:10</span><br><span class="line">tc filter add dev eth0 protocol ip parent 1:0 prio 1 u32 match ip src 1.2.3.4 flowid 1:11</span><br></pre></td></tr></table></figure>
+<h2 id="如何控制QoS？"><a href="#如何控制QoS？" class="headerlink" title="如何控制QoS？"></a>如何控制QoS？</h2><p>我们讲过，使用OpenvSwitch将云中的网卡连通在一起，那如何控制QoS呢？</p>
+<p>就像我们上面说的一样，OpenvSwitch支持两种：</p>
+<ul>
+<li>对于进入的流量，可以设置策略Ingress policy；</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ovs-vsctl set Interface tap0 ingress_policing_rate=100000</span><br><span class="line">ovs-vsctl set Interface tap0 ingress_policing_burst=10000</span><br></pre></td></tr></table></figure>
+<ul>
+<li>对于发出的流量，可以设置QoS规则Egress shaping，支持HTB。</li>
+</ul>
+<p>我们构建一个拓扑图，来看看OpenvSwitch的QoS是如何工作的。</p>
+<p>上面的命令创建了一个QoS规则，对应三个Queue。min-rate就是上面的rate，max-rate就是上面的ceil。通过交换机的网络包，要通过流表规则，匹配后进入不同的队列。然后我们就可以添加流表规则Flow(first_br是br0上的port 5)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ovs-ofctl add-flow br0 &quot;in_port=6 nw_src=192.168.100.100 actions=enqueue:5:0&quot;</span><br><span class="line">ovs-ofctl add-flow br0 &quot;in_port=7 nw_src=192.168.100.101 actions=enqueue:5:1&quot;</span><br><span class="line">ovs-ofctl add-flow br0 &quot;in_port=8 nw_src=192.168.100.102 actions=enqueue:5:2&quot;</span><br></pre></td></tr></table></figure>
+<p>接下来，我们单独测试从192.168.100.100，192.168.100.101，192.168.100.102到192.168.100.103的带宽的时候，每个都是能够打满带宽的。</p>
+<p>如果三个一起测试，一起狂发网络包，会发现是按照3:1:6的比例进行的，正是根据配置的队列的带宽比例分配的。</p>
+<p>如果192.168.100.100和192.168.100.101一起测试，发现带宽占用比例为3:1，但是占满了总的流量，也即没有发包的192.168.100.102有60%的带宽被借用了。</p>
+<p>如果192.168.100.100和192.168.100.102一起测试，发现带宽占用比例为1:2。如果192.168.100.101和192.168.100.102一起测试，发现带宽占用比例为1:6。</p>
+<h2 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h2><p>好了，这一节就讲到这里了，我们来总结一下。</p>
+<ul>
+<li>云中的流量控制主要通过队列进行的，队列分为两大类：无类别队列规则和基于类别的队列规则。</li>
+<li>在云中网络Openvswitch中，主要使用的是分层令牌桶规则（HTB），将总的带宽在一棵树上按照配置的比例进行分配，并且在一个分支不用的时候，可以借给另外的分支，从而增强带宽利用率。</li>
+</ul>
+<p>对于云平台中的隔离问题，前面咱们用的策略一直都是VLAN，但是我们也说过这种策略的问题，VLAN只有12位，共4096个。当时设计的时候，看起来是够了，但是现在绝对不够用，怎么办呢？</p>
+<p><strong>一种方式是修改这个协议</strong>。这种方法往往不可行，因为当这个协议形成一定标准后，千千万万设备上跑的程序都要按这个规则来。现在说改就放，谁去挨个儿告诉这些程序呢？很显然，这是一项不可能的工程。</p>
+<p><strong>另一种方式就是扩展</strong>，在原来包的格式的基础上扩展出一个头，里面包含足够用于区分租户的ID，外层的包的格式尽量和传统的一样，依然兼容原来的格式。一旦遇到需要区分用户的地方，我们就用这个特殊的程序，来处理这个特殊的包的格式。</p>
+<p>这个概念很像咱们<a href="https://time.geekbang.org/column/article/10386" target="_blank" rel="noopener">第22讲</a>讲过的<strong>隧道理论</strong>，还记得自驾游通过摆渡轮到海南岛的那个故事吗？在那一节，我们说过，扩展的包头主要是用于加密的，而我们现在需要的包头是要能够区分用户的。</p>
+<p>底层的物理网络设备组成的网络我们称为<strong>Underlay网络</strong>，而用于虚拟机和云中的这些技术组成的网络称为<strong>Overlay网络</strong>，<strong>这是一种基于物理网络的虚拟化网络实现</strong>。这一节我们重点讲两个Overlay的网络技术。</p>
+<h2 id="GRE"><a href="#GRE" class="headerlink" title="GRE"></a>GRE</h2><p>第一个技术是<strong>GRE</strong>，全称Generic Routing Encapsulation，它是一种IP-over-IP的隧道技术。它将IP包封装在GRE包里，外面加上IP头，在隧道的一端封装数据包，并在通路上进行传输，到另外一端的时候解封装。你可以认为Tunnel是一个虚拟的、点对点的连接。</p>
+<p>从这个图中可以看到，在GRE头中，前32位是一定会有的，后面的都是可选的。在前4位标识位里面，有标识后面到底有没有可选项？这里面有个很重要的key字段，是一个32位的字段，里面存放的往往就是用于区分用户的Tunnel ID。32位，够任何云平台喝一壶的了！</p>
+<p>下面的格式类型专门用于网络虚拟化的GRE包头格式，称为<strong>NVGRE</strong>，也给网络ID号24位，也完全够用了。</p>
+<p>除此之外，GRE还需要有一个地方来封装和解封装GRE的包，这个地方往往是路由器或者有路由功能的Linux机器。</p>
+<p>使用GRE隧道，传输的过程就像下面这张图。这里面有两个网段、两个路由器，中间要通过GRE隧道进行通信。当隧道建立之后，会多出两个Tunnel端口，用于封包、解封包。</p>
+<ol>
+<li>主机A在左边的网络，IP地址为192.168.1.102，它想要访问主机B，主机B在右边的网络，IP地址为192.168.2.115。于是发送一个包，源地址为192.168.1.102，目标地址为192.168.2.115。因为要跨网段访问，于是根据默认的default路由表规则，要发给默认的网关192.168.1.1，也即左边的路由器。</li>
+<li>根据路由表，从左边的路由器，去192.168.2.0/24这个网段，应该走一条GRE的隧道，从隧道一端的网卡Tunnel0进入隧道。</li>
+<li>在Tunnel隧道的端点进行包的封装，在内部的IP头之外加上GRE头。对于NVGRE来讲，是在MAC头之外加上GRE头，然后加上外部的IP地址，也即路由器的外网IP地址。源IP地址为172.17.10.10，目标IP地址为172.16.11.10，然后从E1的物理网卡发送到公共网络里。</li>
+<li>在公共网络里面，沿着路由器一跳一跳地走，全部都按照外部的公网IP地址进行。</li>
+<li>当网络包到达对端路由器的时候，也要到达对端的Tunnel0，然后开始解封装，将外层的IP头取下来，然后根据里面的网络包，根据路由表，从E3口转发出去到达服务器B。</li>
+</ol>
+<p>从GRE的原理可以看出，GRE通过隧道的方式，很好地解决了VLAN ID不足的问题。但是，GRE技术本身还是存在一些不足之处。</p>
+<p>首先是<strong>Tunnel的数量问题</strong>。GRE是一种点对点隧道，如果有三个网络，就需要在每两个网络之间建立一个隧道。如果网络数目增多，这样隧道的数目会呈指数性增长。</p>
+<p>其次，<strong>GRE不支持组播</strong>，因此一个网络中的一个虚机发出一个广播帧后，GRE会将其广播到所有与该节点有隧道连接的节点。</p>
+<p>另外一个问题是目前还是<strong>有很多防火墙和三层网络设备无法解析GRE</strong>，因此它们无法对GRE封装包做合适地过滤和负载均衡。</p>
+<h2 id="VXLAN"><a href="#VXLAN" class="headerlink" title="VXLAN"></a>VXLAN</h2><p>第二种Overlay的技术称为VXLAN。和三层外面再套三层的GRE不同，VXLAN则是从二层外面就套了一个VXLAN的头，这里面包含的VXLAN ID为24位，也够用了。在VXLAN头外面还封装了UDP、IP，以及外层的MAC头。</p>
+<p>VXLAN作为扩展性协议，也需要一个地方对VXLAN的包进行封装和解封装，实现这个功能的点称为<strong>VTEP</strong>（VXLAN Tunnel Endpoint）。</p>
+<p>VTEP相当于虚拟机网络的管家。每台物理机上都可以有一个VTEP。每个虚拟机启动的时候，都需要向这个VTEP管家注册，每个VTEP都知道自己上面注册了多少个虚拟机。当虚拟机要跨VTEP进行通信的时候，需要通过VTEP代理进行，由VTEP进行包的封装和解封装。</p>
+<p>和GRE端到端的隧道不同，VXLAN不是点对点的，而是支持通过组播的来定位目标机器的，而非一定是这一端发出，另一端接收。</p>
+<p>当一个VTEP启动的时候，它们都需要通过IGMP协议。加入一个组播组，就像加入一个邮件列表，或者加入一个微信群一样，所有发到这个邮件列表里面的邮件，或者发送到微信群里面的消息，大家都能收到。而当每个物理机上的虚拟机启动之后，VTEP就知道，有一个新的VM上线了，它归我管。</p>
+<p>1.Table 0是所有流量的入口，所有进入br1的流量，分为两种流量，一个是进入物理机的流量，一个是从物理机发出的流量。</p>
+<p>2.Table 1用于处理所有出去的网络包，分为两种情况，一种是单播，一种是多播。</p>
+<p>3.Table 2是紧接着Table1的，如果既不是单播，也不是多播，就默认丢弃。</p>
+<p>4.Table 3用于处理所有进来的网络包，需要将隧道Tunnel ID转换为VLAN ID。</p>
+<p>5.对于进来的包，Table 10会进行MAC地址学习。这是一个二层交换机应该做的事情，学习完了之后，再从port 1发出去。</p>
+<p>6.Table 20是MAC Address Learning Table。如果不为空，就按照规则处理；如果为空，就说明没有进行过MAC地址学习，只好进行广播了，因而要交给Table 21处理。</p>
+<p>7.Table 21用于处理多播的包。</p>
+<p>如果匹配不上VLAN ID，就默认丢弃。</p>
+<ul>
+<li>要对不同用户的网络进行隔离，解决VLAN数目有限的问题，需要通过Overlay的方式，常用的有GRE和VXLAN。</li>
+<li>GRE是一种点对点的隧道模式，VXLAN支持组播的隧道模式，它们都要在某个Tunnel Endpoint进行封装和解封装，来实现跨物理机的互通。</li>
+<li>OpenvSwitch可以作为Tunnel Endpoint，通过设置流表的规则，将虚拟机网络和物理机网络进行隔离、转换。</li>
+</ul>
+<p>如果说虚拟机是买公寓，容器则相当于合租，有一定的隔离，但是隔离性没有那么好。云计算解决了基础资源层的弹性伸缩，却没有解决PaaS层应用随基础资源层弹性伸缩而带来的批量、快速部署问题。于是，容器应运而生。</p>
+<p>容器就是Container，而Container的另一个意思是集装箱。其实<strong>容器的思想就是要变成软件交付的集装箱</strong>。集装箱的特点，一是打包，二是标准。</p>
+<p>在没有集装箱的时代，假设要将货物从A运到B，中间要经过三个码头、换三次船。每次都要将货物卸下船来，弄的乱七八糟，然后还要再搬上船重新整齐摆好。因此在没有集装箱的时候，每次换船，船员们都要在岸上待几天才能干完活。</p>
+<p>有了尺寸全部都一样的集装箱以后，可以把所有的货物都打包在一起，所以每次换船的时候，一个箱子整体搬过去就行了，小时级别就能完成，船员再也不用耗费很长时间了。这是集装箱的“打包”“标准”两大特点在生活中的应用。</p>
+<p>那么容器如何对应用打包呢？</p>
+<p>学习集装箱，首先要有个封闭的环境，将货物封装起来，让货物之间互不干扰，互相隔离，这样装货卸货才方便。</p>
+<p>封闭的环境主要使用了两种技术，一种是<strong>看起来是隔离的技术</strong>，称为<strong>namespace</strong>，也即每个 namespace中的应用看到的是不同的 IP地址、用户空间、程号等。另一种是<strong>用起来是隔离的技术</strong>，称为<strong>cgroup</strong>，也即明明整台机器有很多的 CPU、内存，而一个应用只能用其中的一部分。</p>
+<p>有了这两项技术，就相当于我们焊好了集装箱。接下来的问题就是如何“将这个集装箱标准化”，并在哪艘船上都能运输。这里的标准首先就是<strong>镜像</strong>。</p>
+<p>所谓镜像，就是将你焊好集装箱的那一刻，将集装箱的状态保存下来，就像孙悟空说：“定！”，集装箱里的状态就被定在了那一刻，然后将这一刻的状态保存成一系列文件。无论从哪里运行这个镜像，都能完整地还原当时的情况。</p>
+<p>接下来我们就具体来看看，这两种网络方面的打包技术。</p>
+<h2 id="命名空间（namespace）"><a href="#命名空间（namespace）" class="headerlink" title="命名空间（namespace）"></a>命名空间（namespace）</h2><p>我们首先来看网络namespace。</p>
+<p>namespace翻译过来就是命名空间。其实很多面向对象的程序设计语言里面，都有命名空间这个东西。大家一起写代码，难免类会起相同的名词，编译就会冲突。而每个功能都有自己的命名空间，在不同的空间里面，类名相同，不会冲突。</p>
+<p>在Linux下也是这样的，很多的资源都是全局的。比如进程有全局的进程ID，网络也有全局的路由表。但是，当一台Linux上跑多个进程的时候，如果我们觉得使用不同的路由策略，这些进程可能会冲突，那就需要将这个进程放在一个独立的namespace里面，这样就可以独立配置网络了。</p>
+<p>网络的namespace由ip netns命令操作。它可以创建、删除、查询namespace。</p>
+<p>我们再来看将你们宿舍放进一台物理机的那个图。你们宿舍长的电脑是一台路由器，你现在应该知道怎么实现这个路由器吧？可以创建一个Router虚拟机来做这件事情，但是还有一个更加简单的办法，就是我在图里画的这条虚线，这个就是通过namespace实现的。</p>
+<h2 id="机制网络（cgroup）"><a href="#机制网络（cgroup）" class="headerlink" title="机制网络（cgroup）"></a>机制网络（cgroup）</h2><p>我们再来看打包的另一个机制网络cgroup。</p>
+<p>cgroup全称control groups，是Linux内核提供的一种可以限制、隔离进程使用的资源机制。</p>
+<p>cgroup能控制哪些资源呢？它有很多子系统：</p>
+<ul>
+<li>CPU子系统使用调度程序为进程控制CPU的访问；</li>
+<li>cpuset，如果是多核心的CPU，这个子系统会为进程分配单独的CPU和内存；</li>
+<li>memory子系统，设置进程的内存限制以及产生内存资源报告；</li>
+<li>blkio子系统，设置限制每个块设备的输入输出控制；</li>
+<li>net_cls，这个子系统使用等级识别符（classid）标记网络数据包，可允许Linux 流量控制程序（tc）识别从具体cgroup中生成的数据包。</li>
+</ul>
+<p>我们这里最关心的是net_cls，它可以和前面讲过的TC关联起来。</p>
+<p>cgroup提供了一个虚拟文件系统，作为进行分组管理和各子系统设置的用户接口。要使用cgroup，必须挂载cgroup文件系统，一般情况下都是挂载到/sys/fs/cgroup目录下。</p>
+<h2 id="容器网络中如何融入物理网络？"><a href="#容器网络中如何融入物理网络？" class="headerlink" title="容器网络中如何融入物理网络？"></a>容器网络中如何融入物理网络？</h2><p>了解了容器背后的技术，接下来我们来看，容器网络究竟是如何融入物理网络的？</p>
+<p>如果你使用docker run运行一个容器，你应该能看到这样一个拓扑结构。</p>
+<p>是不是和虚拟机很像？容器里面有张网卡，容器外有张网卡，容器外的网卡连到docker0网桥，通过这个网桥，容器直接实现相互访问。</p>
+<p>如果你用brctl查看docker0网桥，你会发现它上面连着一些网卡。</p>
+<p>一台机器内部容器的互相访问没有问题了，那如何访问外网呢？</p>
+<p>你先想想看有没有思路？对，就是虚拟机里面的桥接模式和NAT模式。Docker默认使用NAT模式。NAT模式分为SNAT和DNAT，如果是容器内部访问外部，就需要通过SNAT。</p>
+<p>所有从容器内部发出来的包，都要做地址伪装，将源IP地址，转换为物理网卡的IP地址。如果有多个容器，所有的容器共享一个外网的IP地址，但是在conntrack表中，记录下这个出去的连接。</p>
+<p>当服务器返回结果的时候，到达物理机，会根据conntrack表中的规则，取出原来的私网IP，通过DNAT将地址转换为私网IP地址，通过网桥docker0实现对内的访问。</p>
+<p>如果在容器内部属于一个服务，例如部署一个网站，提供给外部进行访问，需要通过Docker的端口映射技术，将容器内部的端口映射到物理机上来。</p>
+<p>例如容器内部监听80端口，可以通Docker run命令中的参数-p 10080:80，将物理机上的10080端口和容器的80端口映射起来， 当外部的客户端访问这个网站的时候，通过访问物理机的10080端口，就能访问到容器内的80端口了。</p>
+<p>好了，这一节就到这里了，我们来总结一下。</p>
+<ul>
+<li>容器是一种比虚拟机更加轻量级的隔离方式，主要通过namespace和cgroup技术进行资源的隔离，namespace用于负责看起来隔离，cgroup用于负责用起来隔离。</li>
+<li>容器网络连接到物理网络的方式和虚拟机很像，通过桥接的方式实现一台物理机上的容器进行相互访问，如果要访问外网，最简单的方式还是通过NAT。</li>
+</ul>
 </div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-13</span><i class="fa fa-tag"></i></div></div></div></div><div class="cc"><a href="http://creativecommons.org/licenses/by-sa/4.0/"><img src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a></div><div class="cc_tips">本作品采用<a href="http://creativecommons.org/licenses/by-sa/4.0/">知识共享署名-相同方式共享 4.0 国际许可协议</a>进行许可。
 <span id="busuanzi_container_page_pv"></span>本文总阅读量：<span id="busuanzi_value_page_pv"></span></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2019/04/09/ssh-maven-install/" title="使用 MAVEN 搭建 SSH">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/03/09/designPattern-observerPattern/" title="设计模式 - 观察者模式">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>
