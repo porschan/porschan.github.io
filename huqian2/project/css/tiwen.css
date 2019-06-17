@@ -1,0 +1,64 @@
+/* 提问页面css */
+.mengban {
+  font-size: 0.36rem;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  display: none;
+  z-index: 1000;
+}
+
+.t-login {
+  width: 5.2rem;
+  height: 3.2rem;
+  position: absolute;
+  top: 3.3rem;
+  left: 50%;
+  background-color: #fff !important;
+  margin-left: -2.6rem;
+  z-index: 1500;
+  border-radius: 0.08rem;
+}
+
+.t-title {
+  font-weight: bolder;
+  text-align: center;
+  /* font-size: 0.2rem; */
+  color: #000;
+  margin-top: .2rem;
+}
+
+.t-button {
+  position: absolute;
+  bottom: .1rem;
+  width: 100%;
+  height: 0.8rem;
+  display: flex;
+  border-top: 1px solid #ddd;
+}
+
+.t-box_big>span:nth-of-type(2) {
+  color: red;
+}
+
+.t-button>span {
+  margin-top: .15rem;
+  display: block;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#canfim,
+#cancel {
+  color: green;
+}
+#cancel{
+  border-right: 1px solid #ddd;
+  height: 0.9rem;
+  margin-top: 0;
+}

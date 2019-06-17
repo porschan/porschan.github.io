@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>海底捞</title>
+  <link rel="stylesheet" href="./css/index.css">
+  <link rel="stylesheet" href="./css/model.css">
+  <link rel="stylesheet" href="./css/tiwen.css">
+  <link rel="stylesheet" href="./css/chaxun.css">
+  <!-- <link rel="stylesheet" href="./css/share.css"> -->
+  <link rel="stylesheet" href="./css/beijing.css">
+  <script type="text/javascript">
+    document.documentElement.style.fontSize = document.documentElement.clientWidth / 640 * 100 + 'px';
+  </script>
+
+  <!--start animate -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+  <!--end animate -->
+
+  <style>
+    ._hiBox{
+      width: 90%;
+      margin: 0 auto;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+      border-radius: .1rem;
+      height: 51px;
+    }
+    ._ul{
+      position: absolute;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: rgb(0, 0, 0, .1);
+  list-style: none;
+    }
+    ._li{
+      padding: .15rem;
+      border-bottom: 1px solid rgba(226, 224, 224, .2);
+      box-sizing: border-box;
+      overflow: hidden;
+      height: .9rem;
+    }
+    ._money_user_wrap{
+      display: flex;
+  align-items: center;
+  float:left;
+    }
+    
+._money_user_wrap ._user_icon {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background-color: #fff;
+}
+  </style>
+</head>
+
+<body>
+  <!-- 首页 -->
+  <div id="index" style="height: 100%;margin: 0 ;padding: 0;font-size: 0.32rem">
+    <div class="layout">
+      <div class="header">
+        <div class="img"></div>
+        <div class="text">
+          <span class="one">庆祝海底捞成功上市！</span>
+          <br>
+          <div class="two">
+            <span class="redpac">全名派发现金红包</span>
+            <span class="example">可提现</span>
+          </div>
+        </div>
+        <!-- 动画类名 -->
+        <div class="open">
+          <div class="open1">
+            <div class="open2" id="donghua">開</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="title">- 今日已有2576人领了红包 -</div>
+        <!-- 外出div -->
+        <div class="_hiBox">
+          <!-- ul -->
+          <div class="_ul">
+            <!-- li class="animated infinite fadeInUp delay-2s"-->
+            <div class="_li" id="changeLi">
+              <div class="_money_user_wrap">
+                <span class="_user_icon">
+                  <img src="https://q.qlogo.cn/qqapp/1104718115/2316567F52712C775048DB02BF5C261C/100" alt="" style="display: block;width: 100%;border-radius: 50%;">
+                </span>
+                <div class="user_info" style="  margin-left: .08rem;font-size: .18rem;color: #fff;">
+                  <div class="user_name" style="  margin-left: .08rem;font-size: .18rem;color: #fff;">二分^_^睡眠</div>
+                  <div class="user_time">16:06</div>
+                </div>
+              </div>
+              <div class="recive_money_wrap" style="  display: flex;font-size: .18rem;align-items: center;float:right;">
+                <span class="recive_money_text" style="  margin-right: .1rem;color: #fff;">领取</span>
+                <span class="recive_money_nums" style="color: #fbdc9c;">12.44元</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hiBox">
+          <ul></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 领取页 -->
+  <div id="model" class="m-kongzhi" style="height: 100%;margin: 0 ;padding: 0;font-size: 0.32rem">
+    <div class="m-layout">
+      <div class="m-header">
+        <div class="m-open">
+          ￥
+        </div>
+      </div>
+      <div class="m-footer">
+        <div class="m-text">
+          <span class="m-play">恭喜领取红包</span><br>
+          <div class="m-price">
+            <span class="m-money">￥</span>
+            <span class="m-nums">107.05</span>
+            <span class="m-hi">最高</span>
+          </div>
+        </div>
+        <div class="m-dataBox">
+          <div class="m-pro">
+            <div class="m-box1">
+              <div id="tixian">立即领取红包</div>
+            </div>
+            <div class="m-box2">
+              <p>今日24点前未收钱，将收回红包资格</p>
+              <p>
+                如多次锁取以最后一次领取金额为准
+              </p>
+            </div>
+          </div>
+          <div class="m-two">
+            总共100000份，已成功发出57887份红包
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 提问页 -->
+  <!-- 蒙版 -->
+  <div id="tiwenye" class="mengban">
+    <div class="t-login">
+      <div class="t-title">海底捞成立于哪一年？</div>
+      <div class="t-box_big" style="font-size:.24rem;text-align: center;margin-top: .25rem;">
+        <span>活动</span><span>限量限时</span>答题即可参与领取</br>现金红包!
+      </div>
+      <div class="t-button">
+        <span id="cancel">1997年</span>
+        <span id="canfim">1998年</span>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="./js/jquery-2.2.2.min.js"></script>
+<script src="./js/index.js"></script>
+
+</html>
+<script>
+$(function () {
+
+  $('#model').hide();
+  $('#tiwenye').hide();
+  $('#chaxunye').hide();
+  // $('#shareye').hide();
+  $('#beijingye').hide();
+  $('#donghua').click(function () {
+    $('#donghua').addClass('a')
+    setTimeout(() => {
+      $('#index').hide();
+      $('#model').fadeIn("slow");
+    }, 1000);
+  });
+  $('#tixian').click(function () {
+    $('#tiwenye').show();
+  })
+  $('#cancel').click(function(){
+    $('#tiwenye').hide();
+    $('#model').show();
+  })
+  $('#canfim').click(function(){
+    $('#tiwenye').hide(); 
+    $('#model').show(); 
+  })
+})
+</script>
