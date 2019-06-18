@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="porschan,710437653@qq.com"><title>JVM - JVM内存管理机制 · chanchifeng</title><meta name="description" content="引自于 把代码写成诗的JVM内存管理机制
+
+导语
+JVM把管理的内存分为若干区域，每个区域的作用不同，存储的内容也不同。每个区域的生命周期也有区别，了解虚拟机的内存管理有助于大家更清晰的编码以及问题排查…
+
+内存模型
+JVM主要管理两种类型的内存，堆和非堆（heap&amp;amp;non－heap），堆是"><meta name="keywords" content="Hexo,HTML,CSS,android,Linux"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title><a href="/">chanchifeng</a></h3><div class="description"><p>Carpet Diem</p></div></div></div><ul class="social-links"><li><a href="http://github.com/porschan"><i class="fa fa-github"></i></a></li></ul><div class="footer"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li><li><a href="/readme">引导</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>JVM - JVM内存管理机制</a></h3></div><div class="post-content"><blockquote>
+<p>引自于 把代码写成诗的<a href="https://mp.weixin.qq.com/s?__biz=MzIwNjE1Njc4MA==&amp;mid=2247483854&amp;idx=1&amp;sn=d761309ba4b91e0e73109c7a695d7ee7&amp;chksm=9724a74da0532e5bd2885f941263df5ffac15f6d1862143758ff31028cd5350c164ab4dc1d82&amp;mpshare=1&amp;scene=1&amp;srcid=&amp;key=330e2f6795e558a925de06900a199676f5fa1f2b765060fbe191514f2828a753b7f964b44ffaba600dde4c90f25f9c4fa16b748e1f8eccdced71d21a6ee4cb1bf125c188238bff863c95a9f51595c0c0&amp;ascene=1&amp;uin=NjI4MjYzOTE4&amp;devicetype=Windows+10&amp;version=62060833&amp;lang=zh_CN&amp;pass_ticket=N5Y%2BnUyirQVn4BFiZ0jeC%2F%2BKA2BlOttQQzaS7AzIO0sBoJzYXXll3q7j8TugBn7q" target="_blank" rel="noopener">JVM内存管理机制</a></p>
+</blockquote>
+<h4 id="导语"><a href="#导语" class="headerlink" title="导语"></a>导语</h4><blockquote>
+<p>JVM把管理的内存分为若干区域，每个区域的作用不同，存储的内容也不同。每个区域的生命周期也有区别，了解虚拟机的内存管理有助于大家更清晰的编码以及问题排查…</p>
+</blockquote>
+<h1 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a><strong>内存模型</strong></h1><ul>
+<li>JVM主要管理两种类型的内存，堆和非堆（heap&amp;non－heap），堆是运行时的内存区域，所有实例和数组的内存都从这里分配。堆的创建是JVM启动时就创建的，堆是Java代码可及的内存，是开发人员可以分配的。非堆是虚拟机留给自己使用的内存。</li>
+<li>方法区，运行时常量池都在非堆内存中。</li>
+</ul>
+<p><img src="/2019/06/17/jvm-model/1.webp" alt="img"></p>
+<h1 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a><strong>方法区</strong></h1><ul>
+<li>方法区也称永久代，属于非堆。属于线程共享内存。</li>
+<li>用于存储类信息，常量，静态变量。默认最小16mb，最大值为64mb。可以通过-xx：permSize和-xx：maxpermSize 参数限制方法区的大小。</li>
+</ul>
+<h1 id="运行时常量池"><a href="#运行时常量池" class="headerlink" title="运行时常量池"></a><strong>运行时常量池</strong></h1><ul>
+<li>运行时常量池属于方法区的一部分。class除了类版本，字段，方法，接口信息外，还有一部分内存用于生产各种符号的引用。这部分内容加载到运行时常量池中。</li>
+<li>string类型常量就是放在这块空间。</li>
+</ul>
+<h1 id="虚拟机栈（JVM-Stack）"><a href="#虚拟机栈（JVM-Stack）" class="headerlink" title="虚拟机栈（JVM Stack）"></a><strong>虚拟机栈（JVM Stack）</strong></h1><ul>
+<li>Java方法运行时的内存模型，是线程私有的，生命周期与线程相同。</li>
+<li>每个方法执行时都会创建一个“栈帧”用于存储局部变量（包括参数），操作栈，方法出口等信息。方法被调用到执行完的过程中对应着一个栈帧在虚拟机栈从入栈到出栈的过程。</li>
+<li>局部变量表存放了基本类型（boolean，byte，char，short，int，float，long，double），对象引用（引用指针，并非对象本身）。</li>
+</ul>
+<h1 id="本地方法栈（Native-Method-Stack）"><a href="#本地方法栈（Native-Method-Stack）" class="headerlink" title="本地方法栈（Native Method Stack）"></a><strong>本地方法栈（Native Method Stack）</strong></h1><ul>
+<li>与虚拟机栈类似，区别在于虚拟机栈存储的是虚拟机执行的java方法，而本地方法栈是存储的native方法。</li>
+</ul>
+<h1 id="Java堆"><a href="#Java堆" class="headerlink" title="Java堆"></a><strong>Java堆</strong></h1><ul>
+<li>Java堆也叫GC堆，是java虚拟机所管理的内存中最大的一块区域，属于各个线程共享的区域。生命周期在JVM启动时创建。</li>
+<li>该内存区域存放了对象实例以及数组（所有new的对象）。</li>
+<li>其大小通过-xms（最小值）和xmx（最大值）参数设置，xms为jvm启动时的申请最小的最小内存，默认为操作系统物理内存的1/64但小于1G，-xmx为jvm可申请的最大内存，默认为物理内存的1/4但小于1G。</li>
+</ul>
+<h1 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a><strong>程序计数器</strong></h1><ul>
+<li>是一块最小的内存区域，作用是当前线程所执行的字节码的行号指示器，在虚拟机模型里，字节码解释器的工作就是通过改变这个计数器的值来选取下一条的字节码指令。分支，循环，异常处理，线程恢复都需要依赖计数器来完成。</li>
+</ul>
+<h1 id="直接内存"><a href="#直接内存" class="headerlink" title="直接内存"></a><strong>直接内存</strong></h1><ul>
+<li>直接内存不属于虚拟机的一部分，也不是Java虚拟机规范中定义的内存区域。直接内存就是本机内存，它不会影响堆内存的大小。</li>
+</ul>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-06-17</span><i class="fa fa-tag"></i></div></div></div></div><div class="cc"><a href="http://creativecommons.org/licenses/by-sa/4.0/"><img src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a></div><div class="cc_tips">本作品采用<a href="http://creativecommons.org/licenses/by-sa/4.0/">知识共享署名-相同方式共享 4.0 国际许可协议</a>进行许可。
+<span id="busuanzi_container_page_pv"></span>本文总阅读量：<span id="busuanzi_value_page_pv"></span></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/06/13/springboot-dependencies/" title="SpringBoot - 查看当前版本的各依赖版本">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>
