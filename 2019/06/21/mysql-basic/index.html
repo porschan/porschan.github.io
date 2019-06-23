@@ -40,5 +40,70 @@ wget https://downloads.mysql.com/archives/get/file/MySQL"><meta name="keywords" 
 <p>rows:<br>根据表统计信息及索引选用的情况，大致估算初找到所需的记录所需要读取的行数。</p>
 <p>Extra:<br>包含不适合在其他列中显示但十分重要的额外信息。<br>【尽快优化】using filesort:说明MySQL会对数据使用一个外部的索引排序，而不是按照表内的索引顺序进行读取。MySQL中无法利用索引完成的排序操作成为文件排序。<br>【尽快优化】using temporary:使用了临时表来保持中间结果，MySQL在对查询结果排序是使用临时表。常见于排序order by和分组查询。<br>using index:表示相应的select操作中使用了覆盖索引（covering index),避免访问了表的数据行，效率不错。<br>如果同时出现using where，表示索引被用来执行索引值得查找。<br>如果没有同时出现using where，表示索引引用来读取数据而非执行查找动作。</p>
 <p>18.覆盖索引（covering index），一说为索引覆盖<br>就是select的数据列只用从索引中就能够取得，不必读取数据化，MySQL可以利用索引返回select列表中的字段，而不必根据索引再次读取数据文件，也就是说查询列要被所建的索引覆盖。</p>
+<p>19.如何确认两表之间如何在对于表添加索引<br>SELECT * FROM TABLE1 LEFT JOIN TABLE2 ON TABLE1.ID = TABLE2.ID;<br>由于TABLE1需要搜索出来，所以优化在与右表，因此在TABLE2中添加索引。</p>
+<p>20.join语句的优化：<br>尽可能减少join语句中的nestedloop的循环总次数;永远用小结果集驱动大的结果集。<br>优先优化nestedloop的内层循环。<br>保证join语句中被驱动表上join条件字段已经被索引。<br>当无法保证被驱动表的join条件字段被索引且内存资源充足的前提下，不要太吝啬joinBuffer的设置。</p>
+<p>21.索引失效：<br>1.全值匹配我最爱。【龙头大哥不能死，中间兄弟不能断】<br>2.最佳左前缀法则–如果索引了多列，要遵守最左前缀法则。指的是查询从索引的最前列开始并且不跳过索引中的列。<br>3.不在索引列上做任何操作（计算、函数、（自动或手动）类型转换），会导致索引失效而转向全表扫描。<br>4.存储引擎不能使用索引中范围条件右边的列。<br>5.尽量使用覆盖索引（只访问索引的查询（索引列和查询列一致）），减少select *。<br>6.MySQL在使用不等于（！=或者&lt;&gt;）的时候无法使用索引会导致全表扫描。<br>7.is null，is not null也也无法使用索引。<br>8.立刻以通配符开头（’%abc….’）mysql索引失效会变成全表扫描的操作–问题：解决like’%字符串%’时索引不被使用的方法？？建立覆盖索引<br>9.字符串不加单引号索引。<br>10.少用or，用它来连接时会索引失效。</p>
+<p>22.小表驱动大表：<br>select * from A where id in（select id from b）<br>当B表的数据集必须小于A表的数据集时，用in由于exists.</p>
+<p>select * from A  where exists (select 1 from b where b.id = a.id)<br>当A表的数据集系小于B表的数据集时，用exists优于in。</p>
+<p>exists：将主查询的数据，放到子查询中做条件验证，根据验证结果（true/false）来决定主查询的数据结果是否得以保留。</p>
+<p>23.提高Order By的速度：<br>1.Order by时select * 是一个大忌只query需要的字段，这点非常重要。</p>
+<p>2.尝试提高sort_buffer_size。</p>
+<p>3.尝试提高max_length_for_sort_data</p>
+<p>24.若order by 不能使用索引：<br>key a_b_c(a,b,c)<br>order by a ASC,b DESC，c DESC//排序不一致<br>where g = const order by b,cat//丢掉a索引<br>where a = const  order by c //丢掉b索引<br>where a = const order by a,d//d不是索引的一部分<br>where a in（…） order by b,c//对于排序来说，多个相等条件也是范围查询</p>
+<p>25.为排序使用索引，不会出现using filesort<br>1)Mysql两种排序方式：文件排序或扫描有序索引排序<br>2)MySQL能为排序与查询使用相同的索引。</p>
+<p>26.查看是否开启和如何开启：<br>mysql&gt; SHOW VARIABLES LIKE ‘%slow_query_log%’;<br>+———————+————————————–+<br>| Variable_name       | Value                                |<br>+———————+————————————–+<br>| slow_query_log      | OFF                                  |<br>| slow_query_log_file | /var/lib/mysql/49f2e38d38b3-slow.log |<br>+———————+————————————–+<br>2 rows in set (0.00 sec)</p>
+<p>开启：<br>mysql&gt; set global slow_query_log=1;</p>
+<p>若需要永久生效需要再my.cnf中修改如下：<br>slow_query_log=1<br>slow_query_log_file=/var/lib/mysql/porschan.log</p>
+<p>查看默认阀值：<br>mysql&gt; SHOW VARIABLES LIKE ‘long_query_time%’;<br>+—————–+———–+<br>| Variable_name   | Value     |<br>+—————–+———–+<br>| long_query_time | 10.000000 |<br>+—————–+———–+<br>1 row in set (0.01 sec)</p>
+<p>设置阀值为3秒：<br>mysql&gt; set global long_query_time = 3;<br>Query OK, 0 rows affected (0.00 sec)</p>
+<p>需要重新连接或者创建新会话。</p>
+<p>睡眠4秒：<br>+———-+<br>| sleep(4) |<br>+———-+<br>|        0 |<br>+———-+<br>1 row in set (4.00 sec)</p>
+<p>查看有多少条SQL为慢查询：<br>mysql&gt; show global status like ‘%Slow_queries%’;<br>+—————+——-+<br>| Variable_name | Value |<br>+—————+——-+<br>| Slow_queries  | 1     |<br>+—————+——-+<br>1 row in set (0.00 sec)</p>
+<p>配置版本：<br>在mysqld配置：<br>slow_query_log=1<br>slow_query_log_file=/var/lib/mysql/porschan.slow.log<br>long_query_tim=3<br>log_output=FILE</p>
+<p>27.mysqldumpslow<br>root@49f2e38d38b3:/var/lib/mysql# mysqldumpslow –help<br>Usage: mysqldumpslow [ OPTS… ] [ LOGS… ]</p>
+<p>Parse and summarize the MySQL slow query log. Options are</p>
+<p>  –verbose    verbose<br>  –debug      debug<br>  –help       write this text to standard output</p>
+<p>  -v           verbose<br>  -d           debug<br>  -s ORDER     what to sort by (al, at, ar, c, l, r, t), ‘at’ is default<br>                al: average lock time<br>                ar: average rows sent<br>                at: average query time<br>                 c: count<br>                 l: lock time<br>                 r: rows sent<br>                 t: query time<br>  -r           reverse the sort order (largest last instead of first)<br>  -t NUM       just show the top n queries<br>  -a           don’t abstract all numbers to N and strings to ‘S’<br>  -n NUM       abstract numbers with at least n digits within names<br>  -g PATTERN   grep: only consider stmts that include this string<br>  -h HOSTNAME  hostname of db server for <em>-slow.log filename (can be wildcard),<br>               default is ‘</em>‘, i.e. match all<br>  -i NAME      name of server instance (if using mysql.server startup script)<br>  -l           don’t subtract lock time from total time</p>
+<p>CREATE TABLE dept(<br>id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,<br>deptno MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,<br>dname VARCHAR(20) NOT NULL DEFAULT “”,<br>loc VARCHAR(13) NOT NULL DEFAULT “”<br>)ENGINE=INNODB DEFAULT CHARSET=GBK;</p>
+<p>CREATE TABLE emp(<br>id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,<br>empno MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,<br>ename VARCHAR(20) NOT NULL DEFAULT “”,<br>job VARCHAR(9) NOT NULL DEFAULT “”,<br>mgr MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,<br>hiredate DATE NOT NULL,<br>sal DECIMAL(7,2) NOT NULL,<br>comm DECIMAL(7,2) NOT NULL,<br>DEPTNO MEDIUMINT UNSIGNED NOT NULL DEFAULT 0<br>)ENGINE=INNODB DEFAULT CHARSET=GBK;</p>
+<p>创建函数，假如报错：This function has none of DETERMINISTIC…</p>
+<h1 id="由于开启过慢查询日志，因为我们开启了bin-log，我们需要指定一个function参数。"><a href="#由于开启过慢查询日志，因为我们开启了bin-log，我们需要指定一个function参数。" class="headerlink" title="由于开启过慢查询日志，因为我们开启了bin-log，我们需要指定一个function参数。"></a>由于开启过慢查询日志，因为我们开启了bin-log，我们需要指定一个function参数。</h1><p>mysql&gt; SHOW VARIABLES LIKE ‘log_bin_trust_function_creators’;<br>+———————————+——-+<br>| Variable_name                   | Value |<br>+———————————+——-+<br>| log_bin_trust_function_creators | OFF   |<br>+———————————+——-+<br>1 row in set (0.00 sec)</p>
+<p>mysql&gt; set global log_bin_trust_function_creators=1;<br>Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; SHOW VARIABLES LIKE ‘log_bin_trust_function_creators’;<br>+———————————+——-+<br>| Variable_name                   | Value |<br>+———————————+——-+<br>| log_bin_trust_function_creators | ON    |<br>+———————————+——-+<br>1 row in set (0.00 sec)</p>
+<p>如果需要永久设置如下：<br>windows在my.int[mysqld]加上log_bin_trust_function_creators=1<br>linux在/etc/my.cnf下my.cnf[mysqld]加上log_bin_trust_function_creators=1</p>
+<p>mysql&gt; desc emp;<br>+———-+———————–+——+—–+———+—————-+<br>| Field    | Type                  | Null | Key | Default | Extra          |<br>+———-+———————–+——+—–+———+—————-+<br>| id       | int(10) unsigned      | NO   | PRI | NULL    | auto_increment |<br>| empno    | mediumint(8) unsigned | NO   |     | 0       |                |<br>| ename    | varchar(20)           | NO   |     |         |                |<br>| job      | varchar(9)            | NO   |     |         |                |<br>| mgr      | mediumint(8) unsigned | NO   |     | 0       |                |<br>| hiredate | date                  | NO   |     | NULL    |                |<br>| sal      | decimal(7,2)          | NO   |     | NULL    |                |<br>| DEPTNO   | mediumint(8) unsigned | NO   |     | 0       |                |<br>+———-+———————–+——+—–+———+—————-+<br>8 rows in set (0.00 sec)</p>
+<p>mysql&gt; select now() from dual;<br>+———————+<br>| now()               |<br>+———————+<br>| 2019-06-22 07:25:12 |<br>+———————+<br>1 row in set (0.00 sec)</p>
+<p>DELIMITER $$<br>CREATE FUNCTION rand_string(n INT) RETURNS VARCHAR(255)<br>BEGIN<br>DECLARE chars_str VARCHAR(100) DEFAULT ‘qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM’;<br>DECLARE return_str VARCHAR(255) DEFAULT ‘’;<br>DECLARE i INT DEFAULT 0;<br>WHILE i&lt;n DO<br>SET return_str = CONCAT(return_str,SUBSTRING(chars_str,FLOOR(1+RAND()*52),1));<br>SET i = i + 1;<br>END WHILE;<br>RETURN return_str;<br>END $$</p>
+<p>DELIMITER $$<br>CREATE FUNCTION rand_num() RETURNS INT(5)<br>BEGIN<br>DECLARE i INT DEFAULT 0;<br>SET i=FLOOR(100+RAND()*10);<br>RETURN i;<br>END $$</p>
+<p>DELIMITER $$<br>CREATE PROCEDURE insert_emp(IN START INT(10),IN max_num INT(10))<br>BEGIN<br>DECLARE i INT DEFAULT 0;<br>SET autocommit = 0;<br>REPEAT<br>SET i = i + 1;<br>INSERT INTO emp(empno,ename,job,mgr,hiredate,sal,comm,deptno) VALUES((START+i),RAND_STRING(6),’salesman’,0001,CURDATE(),2000,400,rand_num());<br>UNTIL i = max_num<br>END REPEAT;<br>COMMIT;<br>END $$</p>
+<p>DELIMITER $$<br>CREATE PROCEDURE insert_dept(IN START INT(10),IN max_num INT(10))<br>BEGIN<br>DECLARE i INT DEFAULT 0;<br>SET autocommit = 0;<br>REPEAT<br>SET i = i + 1;<br>INSERT INTO dept(deptno,dname,loc) VALUES((START+i),rand_string(10),rand_string(8));<br>UNTIL i = max_num<br>END REPEAT;<br>COMMIT;<br>END $$</p>
+<p>DELIMITER ;<br>CALL insert_dept(100,10);</p>
+<p>DELIMITER ;<br>CALL insert_emp(100001,500000);</p>
+<p>28.查看profiling<br>mysql&gt; show variables like ‘profiling’;<br>+—————+——-+<br>| Variable_name | Value |<br>+—————+——-+<br>| profiling     | OFF   |<br>+—————+——-+<br>1 row in set (0.00 sec)</p>
+<p>mysql&gt;  set profiling = on;<br>Query OK, 0 rows affected, 1 warning (0.00 sec)</p>
+<p>设置打开。</p>
+<p>mysql&gt; show profiles;<br>+———-+————+———————————————-+<br>| Query_ID | Duration   | Query                                        |<br>+———-+————+———————————————-+<br>|        1 | 0.36642675 | select <em> from emp group by id%10 limit 15000 |<br>|        2 | 0.38175700 | select </em> from emp group by id%20 order by 5  |<br>|        3 | 0.00011450 | set profiling = on                           |<br>+———-+————+———————————————-+<br>3 rows in set, 1 warning (0.00 sec)</p>
+<p>mysql&gt; show profile cpu,block io for query 3;<br>+—————-+———-+———-+————+————–+—————+<br>| Status         | Duration | CPU_user | CPU_system | Block_ops_in | Block_ops_out |<br>+—————-+———-+———-+————+————–+—————+<br>| starting       | 0.000056 | 0.000051 |   0.000000 |            0 |             0 |<br>| Opening tables | 0.000013 | 0.000014 |   0.000000 |            0 |             0 |<br>| query end      | 0.000006 | 0.000005 |   0.000000 |            0 |             0 |<br>| closing tables | 0.000005 | 0.000004 |   0.000000 |            0 |             0 |<br>| freeing items  | 0.000019 | 0.000020 |   0.000000 |            0 |             0 |<br>| cleaning up    | 0.000017 | 0.000016 |   0.000000 |            0 |             0 |<br>+—————-+———-+———-+————+————–+—————+<br>6 rows in set, 1 warning (0.00 sec)</p>
+<p>29.全局查询日志：<br>配置启动：<br>在MySQL的my.cnf中，设置如下：</p>
+<p>#开启：general_log=1</p>
+<p>#记录日志文件的路径：<br>general_log_file=/path/logfile</p>
+<p>#输出格式<br>log_output=FILE</p>
+<p>编码设置：<br>set global general_log=1;</p>
+<p>set global log_output = ‘TABLE’;</p>
+<p>此后，你所编写的SQL语句，将会记录到MySQL库中的general_log表，可以用下面的命令查看：<br>select * from mysql.general_log;</p>
+<p>mysql&gt; set global general_log=1;<br>Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; set global log_output = ‘TABLE’;<br>Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; select <em> from mysql.general_log;<br>+—————————-+—————————+———–+———–+————–+———————————+<br>| event_time                 | user_host                 | thread_id | server_id | command_type | argument                        |<br>+—————————-+—————————+———–+———–+————–+———————————+<br>| 2019-06-22 08:55:49.304028 | root[root] @  [127.0.0.1] |         5 |         0 | Query        | select </em> from mysql.general_log |<br>+—————————-+—————————+———–+———–+————–+———————————+<br>1 row in set (0.00 sec)</p>
+<p>永远不要再生成环境中开启此功能。</p>
+<p>30.对数据操作的类型（读、写）<br>读锁（共享锁）：针对同一份数据，多个读操作可以同时进行而不会相互影响。<br>写锁（排它锁）：当前写操作没有完成前，它会阻断其他写锁和读锁。</p>
+<p>对数据操作的粒度分类：锁表、锁行。</p>
+<p>锁表：偏向MyISAM存储引擎，开销小，加锁快，无死锁，锁定粒度大，发生锁冲突的概率最高，并发度最低。</p>
+<p>查看表上加过的锁：<br>show open tables;</p>
+<p>手动添加表锁：<br>lock table 表名字 read(write), 表名字2 read(write), 其他；<br>手动解表锁：<br>unlock tables;</p>
+<p>锁表的会话不能查询其他没有加锁的表。</p>
+<p>简单而言，读所会阻塞写，但不会阻塞读，而写锁则会把读和写都阻塞。</p>
+<p>如何分析表锁定：<br>show status like ‘table%’;</p>
+<p>table_locks_immediate:产生表级锁定的次数，表示可以立即获取锁的查询次数，每立即获取锁加1。<br>table_locks_waited:出现表级锁定争用而发生的等待次数（不能立即获取锁的次数，每等待一次锁值加1），此值高则说明存在着较严重的表级锁争用情况。</p>
+<p>行锁：<br>偏向InnoDB存储引擎，开销大，加锁慢，会出现死锁，锁定粒度最小，发生锁冲突的概率最低，并发度也最高。<br>InnoDB与MyISAM的最大不同有两点，意识支持事务（TRANSACTION）；二是采用了行级锁。</p>
 </div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-06-21</span><i class="fa fa-tag"></i></div></div></div></div><div class="cc"><a href="http://creativecommons.org/licenses/by-sa/4.0/"><img src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a></div><div class="cc_tips">本作品采用<a href="http://creativecommons.org/licenses/by-sa/4.0/">知识共享署名-相同方式共享 4.0 国际许可协议</a>进行许可。
-<span id="busuanzi_container_page_pv"></span>本文总阅读量：<span id="busuanzi_value_page_pv"></span></div><div class="pagination"><ul class="clearfix"><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/06/19/springboot-rabbitMQ-comsumer-producer/" title="使用 IDEA 中创建 SpringBoot + RabbitMQ 项目">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>
+<span id="busuanzi_container_page_pv"></span>本文总阅读量：<span id="busuanzi_value_page_pv"></span></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2019/06/23/windows-nvm/" title="在 Windows 下安装 nvm">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/06/19/springboot-rabbitMQ-comsumer-producer/" title="使用 IDEA 中创建 SpringBoot + RabbitMQ 项目">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>

@@ -1,4 +1,47 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="porschan,710437653@qq.com"><title>chanchifeng</title><meta name="description" content="A Blog Powered By Hexo"><meta name="keywords" content="Hexo,HTML,CSS,android,Linux"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title><a href="/">chanchifeng</a></h3><div class="description"><p>Carpet Diem</p></div></div></div><ul class="social-links"><li><a href="http://github.com/porschan"><i class="fa fa-github"></i></a></li></ul><div class="footer"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a class="current" href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li><li><a href="/readme">引导</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)" style="display:none;"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/07/designPattern-agentmodePattern/">结构型模式 - 代理模式</a></h3></div><div class="post-content"><p>感想代理模式：为一个对象提供一个替身，以控制对这个对象的访问。被代理的对象可以使远程对象，创建开销搭的对象或需要安全控制的对象。代理模式有很多变体，都是为了控制与管理对象访问。
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author" content="porschan,710437653@qq.com"><title>chanchifeng</title><meta name="description" content="A Blog Powered By Hexo"><meta name="keywords" content="Hexo,HTML,CSS,android,Linux"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title><a href="/">chanchifeng</a></h3><div class="description"><p>Carpet Diem</p></div></div></div><ul class="social-links"><li><a href="http://github.com/porschan"><i class="fa fa-github"></i></a></li></ul><div class="footer"></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a class="current" href="/">首页</a></li><li><a href="/about">关于</a></li><li><a href="/archives">归档</a></li><li><a href="/links">友链</a></li><li><a href="/readme">引导</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)" style="display:none;"> </a></li></div><div class="avatar"><img src="/images/favicon.png"></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/13/designPattern-flyweightPattern/">设计模式 - 蝇量模式</a></h3></div><div class="post-content"><p>感想蝇量模式：通过共享的方式高效地支持大量细粒度的对象。
+蝇量模式的优点：
+
+减少运行时的对象实例个数，节省创建开销和内容。
+将许多“虚拟”对象的状态集中管理。
+
+蝇量模式的缺点：
+
+系统设计更加复杂。
+需要专门维护对象的外部状态。
+
+传统的方法，如下：
+12345678910111213141516171819...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-13</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/12/designPattern-chainPattern/">设计模式 - 责任链模式</a></h3></div><div class="post-content"><p>感想责任链模式：如果有多个对象都有机会处理请求，责任链可使请求的发送者和接收者解耦，请求沿着责任链传递，直到有一个对象处理了它为止。
+责任链模式的优点：
+
+将请求的发送者和接收者解耦，使多个对象都有机会处理这个请求。
+可以简化对象，因为它无须知道链的结构。
+可以动态地添加或删减处理请求的链结构。
+
+责任链模式的缺...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-12</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/12/designPattern-builderPattern/">设计模式 - 生成器模式</a></h3></div><div class="post-content"><p>感想生成器模式：封装一个复杂对象构建过程，并允许按步骤构造。
+生成器模式有点：
+
+将复杂对象的创建过程封装起来。
+允许对象通过几个步骤来创建，并且可以改变过程（工程模式只有一个步骤）。
+只需指定具体生成器就能生成特定对象，隐藏类的内部结构。
+对象的实现可以被替换。
+
+a.以下以旅游社的行程表为例子，定义一个行程表...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-12</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/10/java-idea-javadoc/">使用IDEA生成javadoc</a></h3></div><div class="post-content"><p>
+以下例子引用了vbirdbest的例子：Javadoc 使用详解
+
+1.点击头顶菜单栏Tools,选择Generate JavaDoc…，操作如下：
+
+2.在Specify Generate JavaDoc Scope 弹窗中操作如下：
+
+3.在指定的文件夹内即可完成。
+</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-10</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/09/designPattern-bridgemsPattern/">设计模式 - 桥接模式</a></h3></div><div class="post-content"><p>感想桥接模式：将实现与抽象放在两个不同的类层次中，使两个层次可以对立改变。
+桥接模式原理：系统有多维度角度分类时，而每一种分类又有可能变化，考虑使用桥接模式桥接的目的是分离抽象与实现，使抽象和实现可以对立变化。
+这里以遥控器和电视都有可能需要拓展为例子：
+a.先定义遥控器的接口：
+1234567891011pub...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-09</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/08/designPattern-compoundPattern/">设计模式 - 复合模式</a></h3></div><div class="post-content"><p>感想复合模式：模式常一起使用，组合在一个设计解决方案中，复合模式在一个解决方案中结合两个或多个模式，能解决一般性或一系列的问题，某些模式结合使用，并不就是复合模式。
+MVC复合模式：
+MVC：（Model - View - Controller）
+Model：是程序主体，代表了业务数据和业务逻辑。
+View：是与...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-08</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/07/designPattern-agentmodePattern/">结构型模式 - 代理模式</a></h3></div><div class="post-content"><p>感想代理模式：为一个对象提供一个替身，以控制对这个对象的访问。被代理的对象可以使远程对象，创建开销搭的对象或需要安全控制的对象。代理模式有很多变体，都是为了控制与管理对象访问。
 常见的代理模式有：
 
 虚拟代理（虚拟代理为创建开销大的对象提供代理服务，真正的对象在创建前和创建中，由虚拟代理来扮演替身）
@@ -12,45 +55,4 @@ a.定义状态：
 a.创建抽象组件：
 12345678910111213141516171819202122232425...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-05</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/04/designPattern-iteratormodePattern/">设计模式 - 迭代器模式</a></h3></div><div class="post-content"><p>感想迭代器模式：提供了一种方法顺序访问一个聚合对象中的各个对象。
 a.定义一个菜单类型：
-123456789101112131415161718192021222324252627282930public class MenuItem &#123;    private String name, descript...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-04</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/04/designPattern-templatemodePattern/">行为型模式 - 模板模式</a></h3></div><div class="post-content"><p>感想模板模式：封装了一个算法步骤，并允许子类为一个或多个步骤方法提供实现。模板模式可以使子类在不改变算法结构的情况下，重新定义算法中的某些步骤。
-
-以下例子引用了韧雪飞舞的例子：设计模式之 - 模板模式（Template Pattern）
-
-a. 先来写一个抽象的做菜父类：
-1234567891011121314...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-04</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/05/04/designPattern-facadePattern/">设计模式 - 外观模式</a></h3></div><div class="post-content"><p>感想外观模式：提供一个统一的接口，来访问子系统中一群功能相关接口。外观模式定义了一个高层接口，让子系统更容易使用。
-
-以下例子引用了HappyCorn的例子：设计模式总结篇系列：外观模式（Facade）
-
-行政审批接口:
-123interface Executive&#123;    public void ap...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-04</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/04/29/designPattern-adapterPattern/">结构型模式 - 设配器模式</a></h3></div><div class="post-content"><p>感想这里主要有2种适配器模式：
-
-类适配器模式
-对象适配器模式
-
-适配器模式：将一个类的接口转换成另一种接口，让原本接口不兼容的类可以兼容。
-
-以下例子引用了ai-exception在csdn上面的例子：适配器模式之类适配器与对象适配器的区别及代码实现
-
-类适配器模式类适配器模式：通过多重继承目标接口和被适配者类...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-04-29</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/04/27/designPattern-commandPattern/">设计模式 - 命令模式</a></h3></div><div class="post-content"><p>感想命令模式：将请求、命令、动作等封装成对象，这样可以让项目使用这些对象来参数化其他对象。是的命令的请求者和执行者解耦。
-例子以一行2个按钮的遥控器作示范。
-如下图所示，若添加新的设备，则需要在该类中添加新的成员变量，及实现的方法中添加更多的代码，使得代码耦合度高，相互依赖大，影响后期的维护以及开发。
-
-1.将请...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-04-27</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/04/26/designPattern-factoryPattern/">创建型模式 - 工厂模式</a></h3></div><div class="post-content"><p>感想这里主要有2种工厂模式：
-
-简单工厂模式
-抽象工厂模式
-
-简单工厂模式这里引用鹏鹏的博客为例子（https://www.cnblogs.com/liaoweipeng/p/5768197.html）：
-简单工厂模式的概念:建立一个工厂类，对实现了同一接口的一些类进行实例的创建。简单工厂模式的实质是由一个工厂类...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-04-26</span><i class="fa fa-tag"></i></div></div></div></div><div class="post animated fadeInDown"><div class="post-title"><h3><a href="/2019/04/26/springMVC-create/">使用IDEA创建SPRING MVC 项目</a></h3></div><div class="post-content"><p>1.新建一个空项目，这里使用Maven创建一个空的Maven项目。
-
-2.填写GroupId和ArtifactId。
-
-3.填写Project name。
-
-4.创建一个目录，名叫webapp。
-
-5.在项目结构下设置web,先添加web。
-
-6.选中springMVC-create2。
-
-7.在Web Reso...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-04-26</span><i class="fa fa-tag"></i></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/page/5/">上一页</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/page/7/">下一页</a></li></ul></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>
+123456789101112131415161718192021222324252627282930public class MenuItem &#123;    private String name, descript...</p></div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-05-04</span><i class="fa fa-tag"></i></div></div></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/page/5/">上一页</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/page/7/">下一页</a></li></ul></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>
