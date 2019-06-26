@@ -684,5 +684,81 @@ Java 虚拟机识别方法的关键在于类名、方法名以及方法描述符
 <h2 id="总结与实践-10"><a href="#总结与实践-10" class="headerlink" title="总结与实践"></a>总结与实践</h2><p>今天我介绍了即时编译器去虚化的几种方法。</p>
 <p>完全去虚化通过类型推导或者类层次分析，将虚方法调用转换为直接调用。它的关键在于证明虚方法调用的目标方法是唯一的。</p>
 <p>条件去虚化通过向代码中增添类型比较，将虚方法调用转换为一个个的类型测试以及对应该类型的直接调用。它将借助 Java 虚拟机所收集的类型 Profile。</p>
+<p>为了解答这个问题，我们来读一下<code>String.indexOf</code>方法的源代码（上面的代码截取自 Java 10.0.2）。</p>
+<blockquote>
+<p>在 Java 9 之前，字符串是用 char 数组来存储的，主要为了支持非英文字符。然而，大多数 Java 程序中的字符串都是由 Latin1 字符组成的。也就是说每个字符仅需占据一个字节，而使用 char 数组的存储方式将极大地浪费内存空间。</p>
+<p>Java 9 引入了 Compact Strings[1] 的概念，当字符串仅包含 Latin1 字符时，使用一个字节代表一个字符的编码格式，使得内存使用效率大大提高。</p>
+</blockquote>
+<p>假设我们调用<code>String.indexOf</code>方法的调用者以及参数均为只包含 Latin1 字符的字符串，那么该方法的关键在于对<code>StringLatin1.indexOf</code>方法的调用。</p>
+<p>下面我列举了<code>StringLatin1.indexOf</code>方法的源代码。你会发现，它并没有使用特别高明的算法，唯一值得注意的便是方法声明前的<code>@HotSpotIntrinsicCandidate</code>注解。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">@HotSpotIntrinsicCandidate</span><br><span class="line">public static int indexOf(byte[] value, byte[] str) &#123;</span><br><span class="line">    if (str.length == 0) &#123;</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">    if (value.length == 0) &#123;</span><br><span class="line">        return -1;</span><br><span class="line">    &#125;</span><br><span class="line">    return indexOf(value, value.length, str, str.length, 0);</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">@HotSpotIntrinsicCandidate</span><br><span class="line">public static int indexOf(byte[] value, int valueCount, byte[] str, int strCount, int fromIndex) &#123;</span><br><span class="line">    byte first = str[0];</span><br><span class="line">    int max = (valueCount - strCount);</span><br><span class="line">    for (int i = fromIndex; i &lt;= max; i++) &#123;</span><br><span class="line">        // Look for first character.</span><br><span class="line">        if (value[i] != first) &#123;</span><br><span class="line">            while (++i &lt;= max &amp;&amp; value[i] != first);</span><br><span class="line">        &#125;</span><br><span class="line">        // Found first character, now look at the rest of value</span><br><span class="line">        if (i &lt;= max) &#123;</span><br><span class="line">            int j = i + 1;</span><br><span class="line">            int end = j + strCount - 1;</span><br><span class="line">            for (int k = 1; j &lt; end &amp;&amp; value[j] == str[k]; j++, k++);</span><br><span class="line">            if (j == end) &#123;</span><br><span class="line">                // Found whole string.</span><br><span class="line">                return i;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return -1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 HotSpot 虚拟机中，所有被该注解标注的方法都是 HotSpot intrinsic。对这些方法的调用，会被 HotSpot 虚拟机替换成高效的指令序列。而原本的方法实现则会被忽略掉。</p>
+<p>换句话说，HotSpot 虚拟机将为标注了<code>@HotSpotIntrinsicCandidate</code>注解的方法额外维护一套高效实现。如果 Java 核心类库的开发者更改了原本的实现，那么虚拟机中的高效实现也需要进行相应的修改，以保证程序语义一致。</p>
+<p>需要注意的是，其他虚拟机未必维护了这些 intrinsic 的高效实现，它们可以直接使用原本的较为低效的 JDK 代码。同样，不同版本的 HotSpot 虚拟机所实现的 intrinsic 数量也大不相同。通常越新版本的 Java，其 intrinsic 数量越多。</p>
+<p>这是因为高效实现通常依赖于具体的 CPU 指令，而这些 CPU 指令不好在 Java 源程序中表达。再者，换了一个体系架构，说不定就没有对应的 CPU 指令，也就无法进行 intrinsic 优化了。</p>
+<p>下面我们便来看几个具体的例子。</p>
+<h2 id="intrinsic-与-CPU-指令"><a href="#intrinsic-与-CPU-指令" class="headerlink" title="intrinsic 与 CPU 指令"></a>intrinsic 与 CPU 指令</h2><p>在文章开头的例子中，<code>StringLatin1.indexOf</code>方法将在一个字符串（byte 数组）中查找另一个字符串（byte 数组），并且返回命中时的索引值，或者 -1（未命中）。</p>
+<p>“恰巧”的是，X86_64 体系架构的 SSE4.2 指令集就包含一条指令 PCMPESTRI，让它能够在 16 字节以下的字符串中，查找另一个 16 字节以下的字符串，并且返回命中时的索引值。</p>
+<p>因此，HotSpot 虚拟机便围绕着这一指令，开发出 X86_64 体系架构上的高效实现，并替换原本对<code>StringLatin1.indexOf</code>方法的调用。</p>
+<p>另外一个例子则是整数加法的溢出处理。一般我们在做整数加法时，需要考虑结果是否会溢出，并且在溢出的情况下作出相应的处理，以保证程序的正确性。</p>
+<p>Java 核心类库提供了一个<code>Math.addExact</code>方法。它将接收两个 int 值（或 long 值）作为参数，并返回这两个 int 值的和。当这两个 int 值之和溢出时，该方法将抛出<code>ArithmeticException</code>异常。</p>
+<p>在 Java 层面判断 int 值之和是否溢出比较费事。我们需要分别比较两个 int 值与它们的和的符号是否不同。如果都不同，那么我们便认为这两个 int 值之和溢出。对应的实现便是两个异或操作，一个与操作，以及一个比较操作。</p>
+<p>在 X86_64 体系架构中，大部分计算指令都会更新状态寄存器（FLAGS register），其中就有表示指令结果是否溢出的溢出标识位（overflow flag）。因此，我们只需在加法指令之后比较溢出标志位，便可以知道 int 值之和是否溢出了。</p>
+<h2 id="intrinsic-与方法内联"><a href="#intrinsic-与方法内联" class="headerlink" title="intrinsic 与方法内联"></a>intrinsic 与方法内联</h2><p>HotSpot 虚拟机中，intrinsic 的实现方式分为两种。</p>
+<p>一种是独立的桩程序。它既可以被解释执行器利用，直接替换对原方法的调用；也可以被即时编译器所利用，它把代表对原方法的调用的 IR 节点，替换为对这些桩程序的调用的 IR 节点。以这种形式实现的 intrinsic 比较少，主要包括<code>Math</code>类中的一些方法。</p>
+<p>另一种则是特殊的编译器 IR 节点。显然，这种实现方式仅能够被即时编译器所利用。</p>
+<p>在编译过程中，即时编译器会将对原方法的调用的 IR 节点，替换成特殊的 IR 节点，并参与接下来的优化过程。最终，即时编译器的后端将根据这些特殊的 IR 节点，生成指定的 CPU 指令。大部分的 intrinsic 都是通过这种方式实现的。</p>
+<p>这个替换过程是在方法内联时进行的。当即时编译器碰到方法调用节点时，它将查询目标方法是不是 intrinsic。</p>
+<p>如果是，则插入相应的特殊 IR 节点；如果不是，则进行原本的内联工作。（即判断是否需要内联目标方法的方法体，并在需要内联的情况下，将目标方法的 IR 图纳入当前的编译范围之中。）</p>
+<p>也就是说，如果方法调用的目标方法是 intrinsic，那么即时编译器会直接忽略原目标方法的字节码，甚至根本不在乎原目标方法是否有字节码。即便是 native 方法，只要它被标记为 intrinsic，即时编译器便能够将之 “ 内联 “ 进来，并插入特殊的 IR 节点。</p>
+<p>事实上，不少被标记为 intrinsic 的方法都是 native 方法。原本对这些 native 方法的调用需要经过 JNI（Java Native Interface），其性能开销十分巨大。但是，经过即时编译器的 intrinsic 优化之后，这部分 JNI 开销便直接消失不见，并且最终的结果也十分高效。</p>
+<p>举个例子，我们可以通过<code>Thread.currentThread</code>方法来获取当前线程。这是一个 native 方法，同时也是一个 HotSpot intrinsic。在 X86_64 体系架构中，R13 寄存器存放着当前线程的指针。因此，对该方法的调用将被即时编译器替换为一个特殊 IR 节点，并最终生成读取 R13 寄存器指令。</p>
+<h2 id="已有-intrinsic-简介"><a href="#已有-intrinsic-简介" class="headerlink" title="已有 intrinsic 简介"></a>已有 intrinsic 简介</h2><p>最新版本的 HotSpot 虚拟机定义了三百多个 intrinsic。</p>
+<p>在这三百多个 intrinsic 中，有三成以上是<code>Unsafe</code>类的方法。不过，我们一般不会直接使用<code>Unsafe</code>类的方法，而是通过<code>java.util.concurrent</code>包来间接使用。</p>
+<p>举个例子，<code>Unsafe</code>类中经常会被用到的便是<code>compareAndSwap</code>方法（Java 9+ 更名为<code>compareAndSet</code>或<code>compareAndExchange</code>方法）。在 X86_64 体系架构中，对这些方法的调用将被替换为<code>lock cmpxchg</code>指令，也就是原子性更新指令。</p>
+<p>除了<code>Unsafe</code>类的方法之外，HotSpot 虚拟机中的 intrinsic 还包括下面的几种。</p>
+<ol>
+<li><code>StringBuilder</code>和<code>StringBuffer</code>类的方法。HotSpot 虚拟机将优化利用这些方法构造字符串的方式，以尽量减少需要复制内存的情况。</li>
+<li><code>String</code>类、<code>StringLatin1</code>类、<code>StringUTF16</code>类和<code>Arrays</code>类的方法。HotSpot 虚拟机将使用 SIMD 指令（single instruction multiple data，即用一条指令处理多个数据）对这些方法进行优化。<br>举个例子，<code>Arrays.equals(byte[], byte[])</code>方法原本是逐个字节比较，在使用了 SIMD 指令之后，可以放入 16 字节的 XMM 寄存器中（甚至是 64 字节的 ZMM 寄存器中）批量比较。</li>
+<li>基本类型的包装类、<code>Object</code>类、<code>Math</code>类、<code>System</code>类中各个功能性方法，反射 API、<code>MethodHandle</code>类中与调用机制相关的方法，压缩、加密相关方法。这部分 intrinsic 则比较简单，这里就不详细展开了。如果你有感兴趣的，可以自行查阅资料，或者在文末留言。</li>
+</ol>
+<p>如果你想知道 HotSpot 虚拟机定义的所有 intrinsic，那么你可以直接查阅 OpenJDK 代码 [2]。（该链接是 Java 12 的 intrinsic 列表。Java 8 的 intrinsic 列表可以查阅这一链接 [3]。）</p>
+<h2 id="总结与实践-11"><a href="#总结与实践-11" class="headerlink" title="总结与实践"></a>总结与实践</h2><p>今天我介绍了 HotSpot 虚拟机中的 intrinsic。</p>
+<p>HotSpot 虚拟机将对标注了<code>@HotSpotIntrinsicCandidate</code>注解的方法的调用，替换为直接使用基于特定 CPU 指令的高效实现。这些方法我们便称之为 intrinsic。</p>
+<p>具体来说，intrinsic 的实现有两种。一是不大常见的桩程序，可以在解释执行或者即时编译生成的代码中使用。二是特殊的 IR 节点。即时编译器将在方法内联过程中，将对 intrinsic 的调用替换为这些特殊的 IR 节点，并最终生成指定的 CPU 指令。</p>
+<p>HotSpot 虚拟机定义了三百多个 intrinsic。其中比较特殊的有<code>Unsafe</code>类的方法，基本上使用 java.util.concurrent 包便会间接使用到<code>Unsafe</code>类的 intrinsic。除此之外，<code>String</code>类和<code>Arrays</code>类中的 intrinsic 也比较特殊。即时编译器将为之生成非常高效的 SIMD 指令。</p>
+<p>我们知道，Java 中<code>Iterable</code>对象的 foreach 循环遍历是一个语法糖，Java 编译器会将该语法糖编译为调用<code>Iterable</code>对象的<code>iterator</code>方法，并用所返回的<code>Iterator</code>对象的<code>hasNext</code>以及<code>next</code>方法，来完成遍历。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public void forEach(ArrayList&lt;Object&gt; list, Consumer&lt;Object&gt; f) &#123;</span><br><span class="line">  for (Object obj : list) &#123;</span><br><span class="line">    f.accept(obj);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>举个例子，上面的 Java 代码将使用 foreach 循环来遍历一个<code>ArrayList</code>对象，其等价的代码如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public void forEach(ArrayList&lt;Object&gt; list, Consumer&lt;Object&gt; f) &#123;</span><br><span class="line">  Iterator&lt;Object&gt; iter = list.iterator();</span><br><span class="line">  while (iter.hasNext()) &#123;</span><br><span class="line">    Object obj = iter.next();</span><br><span class="line">    f.accept(obj);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里我也列举了所涉及的<code>ArrayList</code>代码。我们可以看到，<code>ArrayList.iterator</code>方法将创建一个<code>ArrayList$Itr</code>实例。</p>
+<p>实际上，Java 虚拟机中的即时编译器可以将<code>ArrayList.iterator</code>方法中的实例创建操作给优化掉。不过，这需要方法内联以及逃逸分析的协作。</p>
+<p>在前面几篇中我们已经深入学习了方法内联，今天我便来介绍一下逃逸分析。</p>
+<h2 id="逃逸分析"><a href="#逃逸分析" class="headerlink" title="逃逸分析"></a>逃逸分析</h2><p>逃逸分析是“一种确定指针动态范围的静态分析，它可以分析在程序的哪些地方可以访问到指针”（出处参见 [1]）。</p>
+<p>在 Java 虚拟机的即时编译语境下，逃逸分析将判断<strong>新建</strong>的对象是否<strong>逃逸</strong>。即时编译器判断对象是否逃逸的依据，一是对象是否被存入堆中（静态字段或者堆中对象的实例字段），二是对象是否被传入未知代码中。</p>
+<p>前者很好理解：一旦对象被存入堆中，其他线程便能获得该对象的引用。即时编译器也因此无法追踪所有使用该对象的代码位置。</p>
+<p>关于后者，由于 Java 虚拟机的即时编译器是以方法为单位的，对于方法中未被内联的方法调用，即时编译器会将其当成未知代码，毕竟它无法确认该方法调用会不会将调用者或所传入的参数存储至堆中。因此，我们可以认为方法调用的调用者以及参数是逃逸的。</p>
+<p>通常来说，即时编译器里的逃逸分析是放在方法内联之后的，以便消除这些“未知代码”入口。</p>
+<p>回到文章开头的例子。理想情况下，即时编译器能够内联对<code>ArrayList$Itr</code>构造器的调用，对<code>hasNext</code>以及<code>next</code>方法的调用，以及当内联了<code>Itr.next</code>方法后，对<code>checkForComodification</code>方法的调用。</p>
+<h2 id="基于逃逸分析的优化"><a href="#基于逃逸分析的优化" class="headerlink" title="基于逃逸分析的优化"></a>基于逃逸分析的优化</h2><p>即时编译器可以根据逃逸分析的结果进行诸如锁消除、栈上分配以及标量替换的优化。</p>
+<p>我们先来看一下锁消除。如果即时编译器能够证明锁对象不逃逸，那么对该锁对象的加锁、解锁操作没有意义。这是因为其他线程并不能获得该锁对象，因此也不可能对其进行加锁。在这种情况下，即时编译器可以消除对该不逃逸锁对象的加锁、解锁操作。</p>
+<p>实际上，传统编译器仅需证明锁对象不逃逸出线程，便可以进行锁消除。由于 Java 虚拟机即时编译的限制，上述条件被强化为证明锁对象不逃逸出当前编译的方法。</p>
+<p>在介绍 Java 内存模型时，我曾提过<code>synchronized (new Object()) {}</code>会被完全优化掉。这正是因为基于逃逸分析的锁消除。由于其他线程不能获得该锁对象，因此也无法基于该锁对象构造两个线程之间的 happens-before 规则。</p>
+<p><code>synchronized (escapedObject) {}</code>则不然。由于其他线程可能会对逃逸了的对象<code>escapedObject</code>进行加锁操作，从而构造了两个线程之间的 happens-before 关系。因此即时编译器至少需要为这段代码生成一条刷新缓存的内存屏障指令。</p>
+<p>不过，基于逃逸分析的锁消除实际上并不多见。一般来说，开发人员不会直接对方法中新构造的对象进行加锁。事实上，逃逸分析的结果更多被用于将新建对象操作转换成栈上分配或者标量替换。</p>
+<p>我们知道，Java 虚拟机中对象都是在堆上分配的，而堆上的内容对任何线程都是可见的。与此同时，Java 虚拟机需要对所分配的堆内存进行管理，并且在对象不再被引用时回收其所占据的内存。</p>
+<p>如果逃逸分析能够证明某些新建的对象不逃逸，那么 Java 虚拟机完全可以将其分配至栈上，并且在 new 语句所在的方法退出时，通过弹出当前方法的栈桢来自动回收所分配的内存空间。这样一来，我们便无须借助垃圾回收器来处理不再被引用的对象。</p>
+<p>不过，由于实现起来需要更改大量假设了“对象只能堆分配”的代码，因此 HotSpot 虚拟机<strong>并没有</strong>采用栈上分配，而是使用了标量替换这么一项技术。</p>
+<p>所谓的标量，就是仅能存储一个值的变量，比如 Java 代码中的局部变量。与之相反，聚合量则可能同时存储多个值，其中一个典型的例子便是 Java 对象。</p>
+<p>可以看到，原本需要在内存中连续分布的对象，现已被拆散为一个个单独的字段<code>cursor</code>，<code>lastRet</code>，以及<code>expectedModCount</code>。这些字段既可以存储在栈上，也可以直接存储在寄存器中。而该对象的对象头信息则直接消失了，不再被保存至内存之中。</p>
+<p>由于该对象没有被实际分配，因此和栈上分配一样，它同样可以减轻垃圾回收的压力。与栈上分配相比，它对字段的内存连续性不做要求，而且，这些字段甚至可以直接在寄存器中维护，无须浪费任何内存空间。</p>
+<h2 id="部分逃逸分析"><a href="#部分逃逸分析" class="headerlink" title="部分逃逸分析"></a>部分逃逸分析</h2><p>C2 的逃逸分析与控制流无关，相对来说比较简单。Graal 则引入了一个与控制流有关的逃逸分析，名为部分逃逸分析（partial escape analysis）[2]。它解决了所新建的实例仅在部分程序路径中逃逸的情况。</p>
+<p>假设 if 语句的条件成立的可能性只有 1%，那么在 99% 的情况下，程序没有必要新建对象。其手工优化的版本正是部分逃逸分析想要自动达到的成果。</p>
+<p>部分逃逸分析将根据控制流信息，判断出新建对象仅在部分分支中逃逸，并且将对象的新建操作推延至对象逃逸的分支中。这将使得原本因对象逃逸而无法避免的新建对象操作，不再出现在只执行 if-else 分支的程序路径之中。</p>
+<p>综上，与 C2 所使用的逃逸分析相比，Graal 所使用的部分逃逸分析能够优化更多的情况，不过它编译时间也更长一些。</p>
+<h2 id="总结与实践-12"><a href="#总结与实践-12" class="headerlink" title="总结与实践"></a>总结与实践</h2><p>今天我介绍了 Java 虚拟机中即时编译器的逃逸分析，以及基于逃逸分析的优化。</p>
+<p>在 Java 虚拟机的即时编译语境下，逃逸分析将判断新建的对象是否会逃逸。即时编译器判断对象逃逸的依据有两个：一是看对象是否被存入堆中，二是看对象是否作为方法调用的调用者或者参数。</p>
+<p>即时编译器会根据逃逸分析的结果进行优化，如锁消除以及标量替换。后者指的是将原本连续分配的对象拆散为一个个单独的字段，分布在栈上或者寄存器中。</p>
+<p>部分逃逸分析是一种附带了控制流信息的逃逸分析。它将判断新建对象真正逃逸的分支，并且支持将新建操作推延至逃逸分支。</p>
 </div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-03</span><i class="fa fa-tag"></i></div></div></div></div><div class="cc"><a href="http://creativecommons.org/licenses/by-sa/4.0/"><img src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a></div><div class="cc_tips">本作品采用<a href="http://creativecommons.org/licenses/by-sa/4.0/">知识共享署名-相同方式共享 4.0 国际许可协议</a>进行许可。
 <span id="busuanzi_container_page_pv"></span>本文总阅读量：<span id="busuanzi_value_page_pv"></span></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2019/03/04/springboot-activemq/" title="springboot - 使用 ActiveMQ">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/02/28/windows-activeMQ-install/" title="activeMQ - windows系统安装">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>
