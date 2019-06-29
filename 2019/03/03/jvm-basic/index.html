@@ -817,5 +817,101 @@ Java 虚拟机识别方法的关键在于类名、方法名以及方法描述符
 <p>循环无关代码外提将循环中值不变的表达式，或者循环无关检测外提至循环之前，以避免在循环中重复进行冗余计算。前者是通过 Sea-of-Nodes IR 以及节点调度来共同完成的，而后者则是通过一个独立优化 —— 循环预测来完成的。循环预测还可以外提循环有关的数组下标范围检测。</p>
 <p>循环展开是一种在循环中重复多次迭代，并且相应地减少循环次数的优化方式。它是一种以空间换时间的优化方式，通过增大循环体来获取更多的优化机会。循环展开的特殊形式是完全展开，将原本的循环转换成若干个循环体的顺序执行。</p>
 <p>此外，我还简单地介绍了另外两种循环优化方式：循环判断外提以及循环剥离。</p>
+<p>当网络包到达一个城关的时候，可以通过路由表得到下一个城关的 IP 地址，直接通过 IP地址找就可以了，为什么还要通过本地的MAC地址呢？</p>
+<p>在网络包里，有源IP地址和目标IP地址、源MAC地址和目标MAC地址。从路由表中取得下一跳的IP地址后，应该把这个地址放在哪里呢？如果放在目标IP地址里面，到了城关，谁知道最终的目标在哪里呢？所以要用MAC地址。</p>
+<p>所谓的下一跳，看起来是IP地址，其实是要通过ARP得到MAC地址，将下一跳的MAC地址放在目标MAC地址里面。</p>
+<p>MAC地址可以修改吗？</p>
+<p>我查了一下，MAC（Media Access Control，介质访问控制）地址，也叫硬件地址，长度是48比特（6字节），由16进制的数字组成，分为前24位和后24位。</p>
+<p>前24位叫作<strong>组织唯一标志符</strong>（Organizationally Unique Identifier，OUI），是由IEEE的注册管理机构给不同厂家分配的代码，用于区分不同的厂家。后24位是厂家自己分配的，称为<strong>扩展标识符</strong>。同一个厂家生产的网卡中MAC地址后24位是不同的。</p>
+<p>也就是说，MAC本来设计为唯一性的，但是后来设备越来越多，而且还有虚拟化的设备和网卡，有很多工具可以修改，就很难保证不冲突了。但是至少应该保持一个局域网内是唯一的。</p>
+<p>MAC的设计，使得即便不能保证绝对唯一，但是能保证一个局域网内出现冲突的概率很小。这样，一台机器启动的时候，就能够在没有IP地址的情况下，先用MAC地址进行通信，获得IP地址。</p>
+<p>好在MAC地址是工作在一个局域网中的，因而即便出现了冲突，网络工程师也能够在自己的范围内很快定位并解决这个问题。这就像我们生成UUID或者哈希值，大部分情况下是不会冲突的，但是如果碰巧出现冲突了，采取一定的机制解决冲突就好。</p>
+<p>TCP重试有没有可能导致重复下单？</p>
+<p>答案是不会的。这个在<a href="https://time.geekbang.org/column/article/8975" target="_blank" rel="noopener">TCP</a>那一节有详细的讲解。因为TCP层收到了重复包之后，TCP层自己会进行去重，发给应用层、HTTP层。还是一个唯一的下单请求，所以不会重复下单。</p>
+<p>那什么时候会导致重复下单呢？因为网络原因或者服务端错误，导致TCP连接断了，这样会重新发送应用层的请求，也即HTTP的请求会重新发送一遍。</p>
+<p>如果服务端设计的是无状态的，它记不住上一次已经发送了一次请求。如果处理不好，就会导致重复下单，这就需要服务端除了实现无状态，还需要根据传过来的订单号实现幂等，同一个订单只处理一次。</p>
+<p>还会有的现象是请求被黑客拦截，发送多次，这在HTTPS层可以有很多种机制，例如通过 Timestamp和Nonce随机数联合起来，然后做一个不可逆的签名来保证。</p>
+<p>TCP报平安的包是原路返回吗？</p>
+<p>这里的比喻不够严谨，容易让读者产生误会，这里的原路返回的意思是原样返回，也就是返回也是这个过程，不一定是完全一样的路径。</p>
+<p>IP地址和MAC地址的关系？</p>
+<p>IP是有远程定位功能的，MAC是没有远程定位功能的，只能通过本地ARP的方式找到。</p>
+<p>我个人认为，即便有了IPv6，也不会改变当前的网络分层模式，还是IP层解决远程定位问题，只不过改成IPv6了，到了本地，还是通过MAC。</p>
+<p>如果最后一跳的时候，IP改变了怎么办？</p>
+<p>对于IP层来讲，当包到达最后一跳的时候，原来的IP不存在了。比如网线拔掉了，或者服务器直接宕机了，则ARP就找不到了，所以这个包就会发送失败了。对于IP层的工作就结束了。</p>
+<p>但是IP层之上还有TCP层，TCP会重试的，包还是会重新发送，但是如果服务器没有启动起来，超过一定的次数，最终放弃。</p>
+<p>如果服务器重启了，IP还是原来的IP地址，这个时候TCP重新发送的一个包的时候，ARP是能够得到这个地址的，因而会发到这台机器上来，但是机器上面没有启动服务端监听那个端口，于是会发送ICMP端口不可达。</p>
+<p>如果服务器重启了，服务端也重新启动了，也在监听那个端口了，这个时候TCP的服务端由于是新的，Sequence Number根本对不上，说明不是原来的连接，会发送RST。</p>
+<p>那有没有可能有特殊的场景Sequence Number也能对的上呢？按照Sequence Number的生成算法，是不可能的。</p>
+<p>但是有一个非常特殊的方式，就是虚拟机的热迁移，从一台物理机迁移到另外一台物理机，IP不变，MAC不变，内存也拷贝过去，Sequence Number在内存里面也保持住了，在迁移的过程中会丢失一两个包，但是从TCP来看，最终还是能够连接成功的。</p>
+<p>TCP层报平安，怎么确认浏览器收到呢？</p>
+<p>TCP报平安，只能保证TCP层能够收到，不保证浏览器能够收到。但是可以想象，如果浏览器是你写的一个程序，你也是通过socket编程写的，你是通过socket，建立一个TCP的连接，然后从这个连接里面读取数据，读取的数据就是TCP层确认收到的。</p>
+<p>这个读取的动作是本地系统调用，大部分情况下不会失败的。如果读取失败呢，当然本地会报错，你的socket读取函数会返回错误，如果你是浏览器程序的实现者，你有两种选择，一个是将错误报告给用户，另一个是重新发送一次请求，获取结果显示给用户。</p>
+<p>ARP属于哪个层，一直是有争议的。比如《TCP/IP详解》把它放在了二层和三层之间，但是既然是协议，只要大家都遵守相同的格式、流程就可以了，在实际应用的时候，不会有歧义的，唯一有歧义的是参加各种考试，让你做选择题，ARP属于哪一层？平时工作中咱不用纠结这个。</p>
+<p>为什么要分层？</p>
+<p>其实这是一个架构设计的通用问题，不仅仅是网络协议的问题。一旦涉及到复杂的逻辑，或者软件需求需要经常变动，一般都会通过分层来解决问题。</p>
+<p>假如我们将所有的代码都写在一起，但是产品经理突然想调整一下界面，这背后的业务逻辑变不变，那要不要一起修改呢？所以会拆成两层，把UI层从业务逻辑中分离出来，调用API来进行组合。API不变，仅仅界面变，是不是就不影响后台的代码了？</p>
+<p>为什么要把一些原子的API放在基础服务层呢？将数据库、缓存、搜索引擎等，屏蔽到基础服务层以下，基础服务层之上的组合逻辑层、API层都只能调用基础服务层的API，不能直接访问数据库。</p>
+<p>比如我们要将Oracle切换成MySQL。MySQL有一个库，分库分表成为4个库。难道所有的代码都要修改吗？当然只要把基础服务层屏蔽，提供一致的接口就可以了。</p>
+<p>网络协议也是这样的。有的想基于TCP，自己不操心就能够保证到达；有的想自己实现可靠通信，不基于TCP，而使用UDP。一旦分了层就好办了，定制化后要依赖于下一层的接口，只要实现自己的逻辑就可以了。如果TCP的实现将所有的逻辑耦合在了整个七层，不用TCP的可靠传输机制都没有办法。</p>
+<p>层级之间真实的调用方式是什么样的？</p>
+<p>如果文中是一个逻辑图，这个问题其实已经到实现层面上来了，需要看TCP/IP的协议栈代码了。这里首先推荐一本书《深入理解Linux网络技术内幕》。</p>
+<p>其实下层的协议知道上层协议的，因为在每一层的包头里面，都会有上一层是哪个协议的标识，所以不是一个回调函数，每一层的处理函数都会在操作系统启动的时候，注册到内核的一个数据结构里面，但是到某一层的时候，是通过判断到底是哪一层的哪一个协议，然后去找相应的处理函数去调用。</p>
+<p>什么情况下会有下层没上层？</p>
+<p>有时候我们自己写应用的时候，不一定是直接调用应用层协议的接口，例如HTTP等，而是自己写Socket编程，来约定应用层的协议。再如，ping也是一个应用，但是它没有用传输层的协议，而是用了ICMP的协议。</p>
+<p>由于 X86_64 平台不支持内存间的直接移动，上面代码中的<code>dst[i] = src[i]</code>通常会被编译为两条内存访问指令：第一条指令把<code>src[i]</code>的值读取至寄存器中，而第二条指令则把寄存器中的值写入至<code>dst[i]</code>中。</p>
+<p>因此，上面这段代码中的一个循环迭代将会执行四条内存读取指令，以及四条内存写入指令。</p>
+<p>由于数组元素在内存中是连续的，当从<code>src[i]</code>的内存地址处读取 32 位的内容时，我们将一并读取<code>src[i]</code>至<code>src[i+3]</code>的值。同样，当向<code>dst[i]</code>的内存地址处写入 32 位的内容时，我们将一并写入<code>dst[i]</code>至<code>dst[i+3]</code>的值。</p>
+<p>通过综合这两个批量操作，我们可以使用一条内存读取指令以及一条内存写入指令，完成上面代码中循环体内的全部工作。如果我们用<code>x[i:i+3]</code>来指代<code>x[i]</code>至<code>x[i+3]</code>合并后的值，那么上述优化可以被表述成如下所示的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">void foo(byte[] dst, byte[] src) &#123;</span><br><span class="line">  for (int i = 0; i &lt; dst.length - 4; i += 4) &#123;</span><br><span class="line">    dst[i:i+3] = src[i:i+3];</span><br><span class="line">  &#125;</span><br><span class="line">  ... // post-loop</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="SIMD-指令"><a href="#SIMD-指令" class="headerlink" title="SIMD 指令"></a>SIMD 指令</h2><p>在前面的示例中，我们使用的是 byte 数组，四个数组元素并起来也才 4 个字节。如果换成 int 数组，或者 long 数组，那么四个数组元素并起来将会是 16 字节或 32 字节。</p>
+<p>我们知道，X86_64 体系架构上通用寄存器的大小为 64 位（即 8 个字节），无法暂存这些超长的数据。因此，即时编译器将借助长度足够的 XMM 寄存器，来完成 int 数组与 long 数组的向量化读取和写入操作。（为了实现方便，byte 数组的向量化读取、写入操作同样使用了 XMM 寄存器。）</p>
+<p>所谓的 XMM 寄存器，是由 SSE（Streaming SIMD Extensions）指令集所引入的。它们一开始仅为 128 位。自从 X86 平台上的 CPU 开始支持 AVX（Advanced Vector Extensions）指令集后（2011 年），XMM 寄存器便升级为 256 位，并更名为 YMM 寄存器。原本使用 XMM 寄存器的指令，现将使用 YMM 寄存器的低 128 位。</p>
+<p>前几年推出的 AVX512 指令集，更是将 YMM 寄存器升级至 512 位，并更名为 ZMM 寄存器。HotSpot 虚拟机也紧跟时代，更新了不少基于 AVX512 指令集以及 ZMM 寄存器的优化。不过，支持 AVX512 指令集的 CPU 都比较贵，目前在生产环境中很少见到。</p>
+<p>SSE 指令集以及之后的 AVX 指令集都涉及了一个重要的概念，那便是单指令流多数据流（Single Instruction Multiple Data，SIMD），即通过单条指令操控多组数据的计算操作。这些指令我们称之为 SIMD 指令。</p>
+<p>SIMD 指令将 XMM 寄存器（或 YMM 寄存器、ZMM 寄存器）中的值看成多个整数或者浮点数组成的向量，并且批量进行计算。</p>
+<p>举例来说，128 位 XMM 寄存器里的值可以看成 16 个 byte 值组成的向量，或者 8 个 short 值组成的向量，4 个 int 值组成的向量，两个 long 值组成的向量；而 SIMD 指令<code>PADDB</code>、<code>PADDW</code>、<code>PADDD</code>以及<code>PADDQ</code>，将分别实现 byte 值、short 值、int 值或者 long 值的向量加法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">void foo(int[] a, int[] b, int[] c) &#123;</span><br><span class="line">  for (int i = 0; i &lt; c.length; i++) &#123;</span><br><span class="line">    c[i] = a[i] + b[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面这段代码经过向量化优化之后，将使用<code>PADDD</code>指令来实现<code>c[i:i+3] = a[i:i+3] + b[i:i+3]</code>。其执行过程中的数据流如下图所示，图片源自 Vladimir Ivanov 的演讲 [1]。下图中内存的右边是高位，寄存器的左边是高位，因此数组元素的顺序是反过来的。</p>
+<p>也就是说，原本需要<code>c.length</code>次加法操作的代码，现在最少只需要<code>c.length/4</code>次向量加法即可完成。因此，SIMD 指令也被看成 CPU 指令级别的并行。</p>
+<blockquote>
+<p>这里<code>c.length/4</code>次是理论值。现实中，C2 还将考虑缓存行对齐等因素，导致能够应用向量化加法的仅有数组中间的部分元素。</p>
+</blockquote>
+<h2 id="使用-SIMD-指令的-HotSpot-Intrinsic"><a href="#使用-SIMD-指令的-HotSpot-Intrinsic" class="headerlink" title="使用 SIMD 指令的 HotSpot Intrinsic"></a>使用 SIMD 指令的 HotSpot Intrinsic</h2><p>SIMD 指令虽然非常高效，但是使用起来却很麻烦。这主要是因为不同的 CPU 所支持的 SIMD 指令可能不同。一般来说，越新的 SIMD 指令，它所支持的寄存器长度越大，功能也越强。</p>
+<blockquote>
+<p>目前几乎所有的 X86_64 平台上的 CPU 都支持 SSE 指令集，绝大部分支持 AVX 指令集，三四年前量产的 CPU 支持 AVX2 指令集，最近少数服务器端 CPU 支持 AVX512 指令集。AVX512 指令集的提升巨大，因为它不仅将寄存器长度增大至 512 字节，而且引入了非常多的新指令。</p>
+</blockquote>
+<p>为了能够尽量利用新的 SIMD 指令，我们需要提前知道程序会被运行在支持哪些指令集的 CPU 上，并在编译过程中选择所支持的 SIMD 指令中最新的那些。</p>
+<p>或者，我们可以在编译结果中纳入同一段代码的不同版本，每个版本使用不同的 SIMD 指令。在运行过程中，程序将根据 CPU 所支持的指令集，来选择执行哪一个版本。</p>
+<blockquote>
+<p>虽然程序中包含当前 CPU 可能不支持的指令，但是只要不执行到这些指令，程序便不会出问题。如果不小心执行到这些不支持的指令，CPU 会触发一个中断，并向当前进程发出<code>sigill</code>信号。</p>
+</blockquote>
+<p>不过，这对于使用即时编译技术的 Java 虚拟机来说，并不是一个大问题。</p>
+<p>我们知道，Java 虚拟机所执行的 Java 字节码是平台无关的。它首先会被解释执行，而后反复执行的部分才会被 Java 虚拟机即时编译为机器码。换句话说，在进行即时编译的时候，Java 虚拟机已经运行在目标 CPU 之上，可以轻易地得知其所支持的指令集。</p>
+<p>然而，Java 字节码的平台无关性却引发了另一个问题，那便是 Java 程序无法像 C++ 程序那样，直接使用由 Intel 提供的，将被替换为具体 SIMD 指令的 intrinsic 方法 [2]。</p>
+<p>HotSpot 虚拟机提供的替代方案是 Java 层面的 intrinsic 方法，这些 intrinsic 方法的语义要比单个 SIMD 指令复杂得多。在运行过程中，HotSpot 虚拟机将根据当前体系架构来决定是否将对该 intrinsic 方法的调用替换为另一高效的实现。如果不，则使用原本的 Java 实现。</p>
+<p>对应的 intrinsic 高效实现会将数组的多个元素加载至 XMM/YMM/ZMM 寄存器中，然后进行按位比较。如果两个数组相同，那么其中若干个元素合并而成的值也相同，其按位比较也应成功。反过来，如果按位比较失败，则说明两个数组不同。</p>
+<p>使用 SIMD 指令的 HotSpot intrinsic 是虚拟机开发人员根据其语义定制的，因而性能相当优越。</p>
+<p>不过，由于开发成本及维护成本较高，这种类型的 intrinsic 屈指可数，如用于复制数组的<code>System.arraycopy</code>和<code>Arrays.copyOf</code>，用于比较数组的<code>Arrays.equals</code>，以及 Java 9 新加入的<code>Arrays.compare</code>和<code>Arrays.mismatch</code>，以及字符串相关的一些方法<code>String.indexOf</code>、<code>StringLatin1.inflate</code>。</p>
+<blockquote>
+<p><code>Arrays.copyOf</code>将调用<code>System.arraycopy</code>，实际上只有后者是 intrinsic。在 Java 9 之后，数组比较真正的 intrinsic 是<code>ArraySupports.vectorizedMismatch</code>方法，而<code>Arrays.equals</code>、<code>Arrays.compare</code>和<code>Arrays.mismatch</code>将调用至该方法中。</p>
+</blockquote>
+<p>另外，这些 intrinsic 方法只能做到点覆盖，在不少情况下，应用程序并不会用到这些 intrinsic 的语义，却又存在向量化优化的机会。这个时候，我们便需要借助即时编译器中的自动向量化（auto vectorization）。</p>
+<h2 id="自动向量化"><a href="#自动向量化" class="headerlink" title="自动向量化"></a>自动向量化</h2><p>即时编译器的自动向量化将针对能够展开的计数循环，进行向量化优化。如前面介绍过的这段代码，即时编译器便能够自动将其展开优化成使用<code>PADDD</code>指令的向量加法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">void foo(int[] a, int[] b, int[] c) &#123;</span><br><span class="line">  for (int i = 0; i &lt; c.length; i++) &#123;</span><br><span class="line">    c[i] = a[i] + b[i];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于计数循环的判定，我在上一篇介绍循环优化时已经讲解过了，这里我补充几点自动向量化的条件。</p>
+<ol>
+<li>循环变量的增量应为 1，即能够遍历整个数组。</li>
+<li>循环变量不能为 long 类型，否则 C2 无法将循环识别为计数循环。</li>
+<li>循环迭代之间最好不要有数据依赖，例如出现类似于<code>a[i] = a[i-1]</code>的语句。当循环展开之后，循环体内存在数据依赖，那么 C2 无法进行自动向量化。</li>
+<li>循环体内不要有分支跳转。</li>
+<li>不要手工进行循环展开。如果 C2 无法自动展开，那么它也将无法进行自动向量化。</li>
+</ol>
+<p>我们可以看到，自动向量化的条件较为苛刻。而且，C2 支持的整数向量化操作并不多，据我所致只有向量加法，向量减法，按位与、或、异或，以及批量移位和批量乘法。C2 还支持向量点积的自动向量化，即两两相乘再求和，不过这需要多条 SIMD 指令才能完成，因此并不是十分高效。</p>
+<p>为了解决向量化 intrinsic 以及自动向量化覆盖面过窄的问题，我们在 OpenJDK 的 Paname 项目 [3] 中尝试引入开发人员可控的向量化抽象。</p>
+<p>该抽象将提供一套通用的跨平台 API，让 Java 程序能够定义诸如<code>IntVector&lt;S256Bits&gt;</code>的向量，并使用由它提供的一系列向量化 intrinsic 方法。即时编译器负责将这些 intrinsic 的调用转换为符合当前体系架构 /CPU 的 SIMD 指令。如果你感兴趣的话，可以参考 Vladimir Ivanov 今年在 JVMLS 上的演讲 [4]。</p>
+<h2 id="总结与实践-14"><a href="#总结与实践-14" class="headerlink" title="总结与实践"></a>总结与实践</h2><p>今天我介绍了即时编译器中的向量化优化。</p>
+<p>向量化优化借助的是 CPU 的 SIMD 指令，即通过单条指令控制多组数据的运算。它被称为 CPU 指令级别的并行。</p>
+<p>HotSpot 虚拟机运用向量化优化的方式有两种。第一种是使用 HotSpot intrinsic，在调用特定方法的时候替换为使用了 SIMD 指令的高效实现。Intrinsic 属于点覆盖，只有当应用程序明确需要这些 intrinsic 的语义，才能够获得由它带来的性能提升。</p>
+<p>第二种是依赖即时编译器进行自动向量化，在循环展开优化之后将不同迭代的运算合并为向量运算。自动向量化的触发条件较为苛刻，因此也无法覆盖大多数用例。</p>
 </div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-03-03</span><i class="fa fa-tag"></i></div></div></div></div><div class="cc"><a href="http://creativecommons.org/licenses/by-sa/4.0/"><img src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a></div><div class="cc_tips">本作品采用<a href="http://creativecommons.org/licenses/by-sa/4.0/">知识共享署名-相同方式共享 4.0 国际许可协议</a>进行许可。
 <span id="busuanzi_container_page_pv"></span>本文总阅读量：<span id="busuanzi_value_page_pv"></span></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2019/03/04/springboot-activemq/" title="springboot - 使用 ActiveMQ">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/02/28/windows-activeMQ-install/" title="activeMQ - windows系统安装">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>
