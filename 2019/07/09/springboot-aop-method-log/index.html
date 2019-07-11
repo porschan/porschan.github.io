@@ -25,5 +25,18 @@
 <blockquote>
 <p>项目的Github地址：<a href="https://github.com/porschan/springBootStudio/tree/master/springboot-aop-method-log" target="_blank" rel="noopener">https://github.com/porschan/springBootStudio/tree/master/springboot-aop-method-log</a></p>
 </blockquote>
+<p>在配置 AOP 切面之前，我们需要了解下 <code>aspectj</code> 相关注解的作用：</p>
+<ul>
+<li><strong>@Aspect</strong>：声明该类为一个注解类；</li>
+<li><strong>@Pointcut</strong>：定义一个切点，后面跟随一个表达式，表达式可以定义为切某个注解，也可以切某个 package 下的方法；</li>
+</ul>
+<p>切点定义好后，就是围绕这个切点做文章了：</p>
+<ul>
+<li><strong>@Before</strong>: 在切点之前，织入相关代码；</li>
+<li><strong>@After</strong>: 在切点之后，织入相关代码;</li>
+<li><strong>@AfterReturning</strong>: 在切点返回内容后，织入相关代码，一般用于对返回值做些加工处理的场景；</li>
+<li><strong>@AfterThrowing</strong>: 用来处理当织入的代码抛出异常后的逻辑处理;</li>
+<li><strong>@Around</strong>: 环绕，可以在切入点前后织入代码，并且可以自由的控制何时执行切点；</li>
+</ul>
 </div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2019-07-09</span><i class="fa fa-tag"></i></div></div></div></div><div class="cc"><a href="http://creativecommons.org/licenses/by-sa/4.0/"><img src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a></div><div class="cc_tips">本作品采用<a href="http://creativecommons.org/licenses/by-sa/4.0/">知识共享署名-相同方式共享 4.0 国际许可协议</a>进行许可。
 <span id="busuanzi_container_page_pv"></span>本文总阅读量：<span id="busuanzi_value_page_pv"></span></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2019/07/09/springboot-aop-class-log/" title="SpringBoot - 自定义注解 - AOP切面统一打印出入参日志(CLASS)">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2019/07/09/jeesite-basic/" title="JeeSite 的杂记">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="/js/busuanzi/busuanzi.pure.mini.js"></script></body></html>
